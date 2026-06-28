@@ -4,102 +4,134 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Taniv-Gemini World Cup Predictor</title>
-    <!-- Tailwind CSS CDN for reactive design -->
+    <!-- Tailwind CSS CDN for high-fidelity dashboard layout -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .dashboard-gradient {
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .sports-dark-bg {
+            background-color: #0b0f19;
+        }
+        .panel-surface {
+            background-color: #111827;
+            border: 1px solid #1f2937;
+        }
+        .comparison-divider {
+            background-image: linear-gradient(to bottom, #1f2937 40%, rgba(255,255,255,0) 0%);
+            background-position: right;
+            background-size: 1px 10px;
+            background-repeat: repeat-y;
         }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen font-sans">
+<body class="sports-dark-bg text-slate-100 min-h-screen">
 
-    <!-- Header Section -->
-    <header class="dashboard-gradient border-b border-slate-800 py-8 px-4 text-center">
-        <h1 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
-            ⚽ Taniv-Gemini World Cup Predictor
-        </h1>
-        <p class="text-slate-400 mt-2 max-w-2xl mx-auto text-sm md:text-base">
-            Real-time sports forecasting agent using search-grounded models. Completely credential-free on the frontend.
-        </p>
+    <!-- Top Navigation / Research Header -->
+    <header class="border-b border-slate-800 bg-[#0d121f] px-6 py-6">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="text-center md:text-left">
+                <span class="text-[10px] font-bold tracking-widest text-indigo-400 uppercase bg-indigo-500/10 px-2.5 py-1 rounded border border-indigo-500/20">
+                    Prospective Study: WC 2026
+                </span>
+                <h1 class="text-2xl font-extrabold text-white tracking-tight mt-2 font-mono">
+                    Taniv-Gemini World Cup Predictor
+                </h1>
+                <p class="text-slate-400 text-xs mt-1">
+                    Grounded predictive tracking modeled 2.0 hours prior to official FIFA kickoff.
+                </p>
+            </div>
+            
+            <!-- Global Research Meta Stats -->
+            <div class="flex items-center gap-4 text-xs">
+                <div class="bg-[#111827] border border-slate-850 px-4 py-2 rounded-lg">
+                    <span class="text-slate-500 block uppercase font-bold text-[9px] tracking-wider">Monitored</span>
+                    <span id="total-matches" class="text-slate-200 font-bold font-mono">--</span>
+                </div>
+                <div class="bg-[#111827] border border-slate-850 px-4 py-2 rounded-lg">
+                    <span class="text-slate-500 block uppercase font-bold text-[9px] tracking-wider">Predictions</span>
+                    <span id="total-predictions" class="text-emerald-400 font-bold font-mono">--</span>
+                </div>
+            </div>
+        </div>
     </header>
 
-    <!-- Main Container -->
-    <main class="max-w-6xl mx-auto px-4 py-8">
+    <!-- Main Workspace -->
+    <main class="max-w-6xl mx-auto px-4 py-8 space-y-10">
 
         <!-- ========================================== -->
-        <!-- SECTION 1: UPCOMING/ACTIVE MATCH WINDOW    -->
+        <!-- SECTION 1: THE MONITOR / LIVE WINDOW       -->
         <!-- ========================================== -->
-        <section class="mb-12">
-            <h2 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                <span class="flex h-3 w-3 relative">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-3 w-3 bg-indigo-500"></span>
-                </span>
-                Active Predictive Window
+        <section aria-labelledby="live-window-heading">
+            <h2 id="live-window-heading" class="text-xs font-bold tracking-widest text-slate-400 uppercase mb-4 flex items-center gap-2">
+                <span class="h-2 w-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                Real-Time Predictive Window
             </h2>
-            <div id="live-window-container" class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-2xl">
-                <p class="text-center text-slate-500 py-4">Evaluating next scheduled fixture...</p>
+            <div id="live-window-container" class="panel-surface p-6 rounded-xl shadow-lg">
+                <p class="text-center text-slate-500 py-6 text-xs animate-pulse">Scanning live schedule from database...</p>
             </div>
         </section>
 
         <!-- ========================================== -->
-        <!-- SECTION 2: THE INTERACTIVE COMPARISON ARCHIVE -->
+        <!-- SECTION 2: THE SCIENTIFIC COMPARISON SHEETS -->
         <!-- ========================================== -->
-        <section>
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+        <section aria-labelledby="archive-heading">
+            <div class="border-b border-slate-800 pb-4 mb-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                 <div>
-                    <h2 class="text-2xl font-bold text-white">Match Comparison Archive</h2>
-                    <p class="text-xs text-slate-500 mt-1">Audit predictions side-by-side with official outcomes</p>
+                    <h2 id="archive-heading" class="text-lg font-bold text-white font-mono">Verification Sheets</h2>
+                    <p class="text-xs text-slate-400 mt-1">Grounded predictions compared side-by-side with official post-match results.</p>
                 </div>
                 
-                <!-- Filters Controls -->
+                <!-- Controls Dashboard -->
                 <div class="flex flex-wrap gap-2 w-full md:w-auto">
-                    <!-- Text Search -->
                     <input 
                         type="text" 
                         id="search-input" 
-                        placeholder="Search team name..." 
-                        class="bg-slate-900 border border-slate-800 px-4 py-2 rounded-lg text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 w-full md:w-48"
+                        placeholder="Filter by team..." 
+                        class="bg-[#111827] border border-slate-800 px-3 py-1.5 rounded text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 w-full md:w-44 font-mono"
                     />
-                    <!-- Performance Filter -->
                     <select 
                         id="filter-select" 
-                        class="bg-slate-900 border border-slate-800 px-4 py-2 rounded-lg text-sm text-slate-300 focus:outline-none focus:border-indigo-500 w-full md:w-auto cursor-pointer"
+                        class="bg-[#111827] border border-slate-800 px-3 py-1.5 rounded text-xs text-slate-300 focus:outline-none focus:border-indigo-500 cursor-pointer font-mono w-full md:w-auto"
                     >
                         <option value="all">All Matches</option>
-                        <option value="correct">Correct Winner Predicted</option>
-                        <option value="incorrect">Incorrect Winner Predicted</option>
+                        <option value="correct">Accuracy: Correct Winner</option>
+                        <option value="incorrect">Accuracy: Incorrect Winner</option>
                     </select>
                 </div>
             </div>
 
-            <!-- Comparison Grid -->
+            <!-- Comparison Sheets Stack -->
             <div id="archive-grid" class="space-y-6">
-                <!-- Data populated dynamically -->
+                <!-- Javascript populated -->
             </div>
 
-            <!-- Lazy Loading Controls -->
-            <div class="text-center mt-10" id="lazy-load-container">
+            <!-- Pagination Control -->
+            <div class="text-center mt-8" id="lazy-load-container">
                 <button 
                     id="load-more-btn" 
-                    class="hidden bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 px-6 py-2.5 rounded-lg text-sm font-semibold transition-colors focus:outline-none"
+                    class="hidden bg-[#111827] hover:bg-[#182235] border border-slate-800 text-slate-300 px-5 py-2 rounded text-xs font-semibold tracking-wider transition-colors focus:outline-none font-mono"
                 >
-                    Load More Matches
+                    Load Older Fixtures
                 </button>
             </div>
         </section>
 
     </main>
 
-    <!-- Interactive logic script -->
+    <!-- Core Interactive Logic Script -->
     <script>
         let allMatches = [];
         let filteredMatches = [];
-        let itemsToShow = 4; // Initial lazy loading chunk size
+        let itemsToShow = 4; // Staging pagination limit
 
         /**
-         * Safely extracts a child relation object from either an array or single object format
+         * Robust parser to extract data objects nested as arrays or single structures
          */
         function extractRelation(data) {
             if (!data) return null;
@@ -110,19 +142,18 @@
         }
 
         /**
-         * Pulls data securely from Vercel Serverless Function Proxy.
+         * Securely loads matches payload via local Vercel gateway proxy
          */
         async function loadDashboardData() {
             try {
-                // Fetch fresh data securely with no API keys exposed
+                // Fetch bypassing proxy caches to always secure immediate Supabase updates
                 const response = await fetch(`/api/data?t=${Date.now()}`);
                 
                 if (!response.ok) {
-                    throw new Error(`Failed to contact API gateway (HTTP ${response.status})`);
+                    throw new Error(`API Connection Failed: HTTP ${response.status}`);
                 }
 
                 allMatches = await response.json();
-                
                 console.log("📊 RAW DATABASE PAYLOAD FETCHED:", allMatches);
                 
                 renderLivePredictiveWindow();
@@ -131,142 +162,139 @@
             } catch (err) {
                 console.error("Dashboard error:", err);
                 document.getElementById('live-window-container').innerHTML = `
-                    <div class="text-center py-6 text-red-400">
-                        <p class="font-semibold">Unable to fetch dashboard statistics.</p>
-                        <p class="text-xs text-slate-600 mt-1">${err.message}</p>
+                    <div class="text-center py-6 text-red-400 font-mono text-xs">
+                        <p class="font-semibold">CONNECTION ERROR: SECURE GATEWAY OFFLINE</p>
+                        <p class="text-slate-600 mt-1">${err.message}</p>
                     </div>
                 `;
             }
         }
 
         /**
-         * Evaluates the next match kickoff and locks/unlocks predictions
-         * based on the 2.5-hour threshold constraint.
+         * Manages active pre-match prediction window. Unlocks exactly at T-2.5h
          */
         function renderLivePredictiveWindow() {
             const container = document.getElementById('live-window-container');
             const now = new Date();
 
-            // Find upcoming matches (NOT completed, and kickoff is either in the future OR started within the last 3 hours)
             const upcoming = allMatches.filter(m => {
                 const kickoff = new Date(m.kickoff_time);
                 const real = extractRelation(m.results);
                 const isCompleted = real !== null;
                 
                 const diffHours = (kickoff.getTime() - now.getTime()) / (1000 * 60 * 60);
-                
                 return !isCompleted && diffHours > -3;
             });
 
             if (upcoming.length === 0) {
                 container.innerHTML = `
-                    <p class="text-center text-slate-500 py-6 text-sm">
-                        No active upcoming fixtures found in the database.
+                    <p class="text-center text-slate-500 py-6 text-xs font-mono">
+                        STATUS: ACTIVE MONITOR OFFLINE (NO PENDING MATCHES IN THE 2.5-HOUR WINDOW)
                     </p>
                 `;
                 return;
             }
 
-            // Target the absolute next game
             const targetMatch = upcoming[0];
             const kickoff = new Date(targetMatch.kickoff_time);
             const diffHours = (kickoff.getTime() - now.getTime()) / (1000 * 60 * 60);
-
             const pred = extractRelation(targetMatch.predictions);
 
-            // Render based on time constraint: Unlocks if T-2.5 hours or closer
+            // T-2.5 hours checks
             if (diffHours <= 2.5 && diffHours > -3) {
                 if (pred) {
                     container.innerHTML = `
-                        <div>
-                            <!-- Unlocked Live Prediction Display -->
-                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-800 pb-4 mb-4">
-                                <div>
-                                    <span class="px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-wider">
-                                        🔓 Live Prediction Unlocked
+                        <div class="space-y-6">
+                            <!-- Real-time Unlocked Header -->
+                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-800 pb-4">
+                                <div class="space-y-1">
+                                    <span class="text-[9px] font-bold tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded uppercase">
+                                        Active Forecast Unlocked
                                     </span>
-                                    <h3 class="text-slate-400 text-xs mt-2">Kickoff: ${kickoff.toLocaleString()}</h3>
+                                    <h3 class="text-slate-400 text-xs font-mono mt-1">Kickoff: ${kickoff.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} UTC</h3>
                                 </div>
-                                <div class="text-slate-100 font-bold text-lg">
-                                    ${targetMatch.home_team} <span class="text-slate-600 font-medium text-xs px-2">VS</span> ${targetMatch.away_team}
+                                <div class="text-white font-bold text-lg font-mono">
+                                    ${targetMatch.home_team} <span class="text-slate-600 font-medium text-xs px-2">vs</span> ${targetMatch.away_team}
                                 </div>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- AI Forecast Data Sheet -->
                                 <div class="space-y-4">
                                     <div class="grid grid-cols-2 gap-4">
-                                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80">
-                                            <span class="text-[10px] uppercase font-bold text-slate-500 block">AI Expected Winner</span>
-                                            <span class="text-indigo-400 font-bold text-sm block mt-1">${pred.predicted_winner}</span>
+                                        <div class="bg-slate-950 p-3.5 rounded border border-slate-850">
+                                            <span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider block">Winner Forecast</span>
+                                            <span class="text-slate-200 font-bold text-sm block mt-1 font-mono">${pred.predicted_winner}</span>
                                         </div>
-                                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80">
-                                            <span class="text-[10px] uppercase font-bold text-slate-500 block">AI Scoreline</span>
-                                            <span class="text-indigo-400 font-bold text-sm block mt-1">${pred.predicted_score}</span>
+                                        <div class="bg-slate-950 p-3.5 rounded border border-slate-850">
+                                            <span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider block">Scoreline Forecast</span>
+                                            <span class="text-slate-200 font-bold text-sm block mt-1 font-mono">${pred.predicted_score}</span>
                                         </div>
                                     </div>
-                                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80 text-xs">
-                                        <span class="text-[10px] uppercase font-bold text-indigo-400 block mb-2 tracking-wider">🛡️ Fantasy Agent Picks</span>
+                                    <div class="bg-slate-950 p-4 rounded border border-slate-850 text-xs">
+                                        <span class="text-[9px] font-bold text-indigo-400 uppercase tracking-wider block mb-2">🛡️ FIFA Fantasy Recommendations</span>
                                         <p class="text-slate-300 leading-relaxed">${pred.fantasy_tips}</p>
                                     </div>
                                 </div>
 
-                                <div class="space-y-3">
-                                    <div>
-                                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Goal Scorers:</span>
-                                        <div class="flex flex-wrap gap-1.5 mt-1">${renderBadges(pred.goalscorers, 'soccer')}</div>
+                                <!-- Real-time Event Metrics table -->
+                                <div class="bg-slate-950/40 p-4 rounded border border-slate-850 space-y-3">
+                                    <h4 class="text-slate-400 text-[10px] font-bold uppercase tracking-wider border-b border-slate-850 pb-2">Predicted Event Log</h4>
+                                    <div class="grid grid-cols-3 gap-2 py-1 text-xs">
+                                        <span class="text-slate-500 font-medium">Scorers</span>
+                                        <div class="col-span-2 flex flex-wrap gap-1">${renderBadges(pred.goalscorers, 'soccer')}</div>
                                     </div>
-                                    <div>
-                                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Goal Assists:</span>
-                                        <div class="flex flex-wrap gap-1.5 mt-1">${renderBadges(pred.assists, 'assist')}</div>
+                                    <div class="grid grid-cols-3 gap-2 py-1 text-xs">
+                                        <span class="text-slate-500 font-medium">Assists</span>
+                                        <div class="col-span-2 flex flex-wrap gap-1">${renderBadges(pred.assists, 'assist')}</div>
                                     </div>
-                                    <div>
-                                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Bookings:</span>
-                                        <div class="flex flex-wrap gap-1.5 mt-1">${renderBadges(pred.bookings, 'card')}</div>
+                                    <div class="grid grid-cols-3 gap-2 py-1 text-xs">
+                                        <span class="text-slate-500 font-medium">Cards</span>
+                                        <div class="col-span-2 flex flex-wrap gap-1">${renderBadges(pred.bookings, 'card')}</div>
                                     </div>
-                                    <div>
-                                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Injuries:</span>
-                                        <div class="flex flex-wrap gap-1.5 mt-1">${renderBadges(pred.injuries, 'injury')}</div>
+                                    <div class="grid grid-cols-3 gap-2 py-1 text-xs">
+                                        <span class="text-slate-500 font-medium">Injury Risk</span>
+                                        <div class="col-span-2 flex flex-wrap gap-1">${renderBadges(pred.injuries, 'injury')}</div>
                                     </div>
                                 </div>
                             </div>
 
-                            <details class="group mt-6 border border-slate-800 rounded-xl overflow-hidden">
-                                <summary class="list-none flex justify-between items-center p-3 bg-slate-950/60 cursor-pointer text-xs font-bold text-slate-400 hover:text-white select-none">
-                                    <span>🔍 VIEW AI GROUNDED RESEARCH ANALYSIS</span>
-                                    <span class="transition group-open:rotate-180">▼</span>
-                                </summary>
-                                <div class="p-4 bg-slate-950/30 text-slate-400 text-xs leading-relaxed border-t border-slate-800 space-y-4">
-                                    <p>${pred.raw_analysis}</p>
-                                    ${renderCitationsList(pred.grounding_sources)}
+                            <!-- Tactical Briefing Breakdown -->
+                            <div class="border border-slate-850 rounded bg-slate-950/20 overflow-hidden">
+                                <div class="bg-slate-950 px-4 py-2 border-b border-slate-850 text-[10px] font-bold tracking-wider text-slate-400 font-mono">
+                                    🔬 TACTICAL BRIEFING & MATCH NARRATIVE
                                 </div>
-                            </details>
+                                <div class="p-4 text-slate-300 text-xs leading-relaxed space-y-4">
+                                    <p class="whitespace-pre-line">${pred.raw_analysis}</p>
+                                    ${renderCitations(pred.grounding_sources)}
+                                </div>
+                            </div>
                         </div>
                     `;
                 } else {
                     container.innerHTML = `
                         <div class="text-center py-6">
-                            <span class="px-2.5 py-1 rounded-md text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 uppercase tracking-wider">
-                                ⏳ Live Prediction Pipeline Triggered
+                            <span class="px-2.5 py-1 rounded text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 uppercase tracking-wider font-mono">
+                                ⏳ Real-Time Extraction Triggered
                             </span>
-                            <p class="text-slate-400 text-sm mt-4 font-semibold">${targetMatch.home_team} vs ${targetMatch.away_team}</p>
-                            <p class="text-slate-500 text-xs mt-2">Lineup sheets submitted. The AI Agent is currently compiling search results...</p>
+                            <p class="text-slate-400 text-sm mt-4 font-semibold font-mono">${targetMatch.home_team} vs ${targetMatch.away_team}</p>
+                            <p class="text-slate-500 text-xs mt-1">Official lineup sheets received. The AI Agent is compiling search queries...</p>
                         </div>
                     `;
                 }
             } else {
-                // Locked Window Placeholder
+                // Countdown states
                 const hoursLeft = Math.floor(diffHours);
                 const minutesLeft = Math.floor((diffHours - hoursLeft) * 60);
 
                 container.innerHTML = `
                     <div class="text-center py-8">
-                        <div class="text-3xl mb-3">🔒</div>
-                        <span class="text-slate-400 font-bold uppercase tracking-wider text-xs block">Predictions Locked</span>
-                        <p class="text-slate-500 text-xs mt-2">
-                            Next match is <strong class="text-slate-300 font-bold">${targetMatch.home_team} vs ${targetMatch.away_team}</strong>. 
+                        <span class="text-slate-400 font-bold uppercase tracking-wider text-xs block font-mono">Prediction Pipeline Engaged</span>
+                        <p class="text-slate-500 text-xs mt-2 font-mono">
+                            Next Target Match: <strong class="text-slate-300 font-bold">${targetMatch.home_team} vs ${targetMatch.away_team}</strong>. 
                         </p>
-                        <p class="text-indigo-400/90 text-sm font-semibold mt-3">
-                            Prediction releases in roughly ${hoursLeft}h ${minutesLeft}m.
+                        <p class="text-indigo-400/90 text-sm font-semibold mt-3 font-mono">
+                            Auto-release in T-${hoursLeft}h ${minutesLeft}m.
                         </p>
                     </div>
                 `;
@@ -274,19 +302,19 @@
         }
 
         /**
-         * Handles filtering logic based on Search field and dropdown values
+         * Coordinates live filter adjustments
          */
         function applyFilters() {
             const searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
             const filterValue = document.getElementById('filter-select').value;
 
-            // Only archive matches that have a completed result loaded
+            // Target finished matches
             let list = allMatches.filter(m => {
                 const real = extractRelation(m.results);
                 return real !== null;
             });
 
-            // Filter 1: Name search
+            // Name Search Filter
             if (searchQuery !== "") {
                 list = list.filter(m => 
                     m.home_team.toLowerCase().includes(searchQuery) || 
@@ -294,7 +322,7 @@
                 );
             }
 
-            // Filter 2: AI prediction accuracy filter
+            // Accuracy Score Filter
             if (filterValue !== "all") {
                 list = list.filter(m => {
                     const pred = extractRelation(m.predictions);
@@ -314,7 +342,7 @@
         }
 
         /**
-         * Renders comparison entries with side-by-side design
+         * Renders comparison sheets stack
          */
         function renderArchive() {
             const grid = document.getElementById('archive-grid');
@@ -324,8 +352,8 @@
 
             if (matchesToRender.length === 0) {
                 grid.innerHTML = `
-                    <div class="text-center py-12 bg-slate-900/30 border border-slate-800 rounded-xl">
-                        <p class="text-slate-500 text-sm">No matches found matching filter parameters.</p>
+                    <div class="text-center py-12 bg-slate-900/10 border border-slate-850 rounded-xl">
+                        <p class="text-slate-500 text-xs font-mono">NO RECORDS FOUND MATCHING FILTER PARAMETERS.</p>
                     </div>
                 `;
                 document.getElementById('lazy-load-container').classList.add('hidden');
@@ -337,110 +365,112 @@
                 const pred = extractRelation(match.predictions);
                 const real = extractRelation(match.results);
 
-                // Evaluate outcome correctness for visual badging
+                // Audit Status Badges
                 let accuracyBadge = '';
                 if (pred && real) {
                     const isCorrect = pred.predicted_winner.toLowerCase().trim() === real.actual_winner.toLowerCase().trim();
                     accuracyBadge = isCorrect 
-                        ? `<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-md text-[10px] font-bold">✅ Correct Winner predicted</span>`
-                        : `<span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2.5 py-1 rounded-md text-[10px] font-bold">❌ Incorrect Winner predicted</span>`;
+                        ? `<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded text-[10px] font-bold font-mono">STATUS: CONFIRMED ACCURATE</span>`
+                        : `<span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded text-[10px] font-bold font-mono">STATUS: FORECAST ERROR</span>`;
                 }
 
                 const card = document.createElement('div');
-                card.className = "bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4";
+                card.className = "panel-surface p-6 rounded-xl shadow-lg space-y-4";
                 card.innerHTML = `
                     <!-- Row Meta Header -->
-                    <div class="flex justify-between items-center text-xs text-slate-500 border-b border-slate-800/80 pb-3">
-                        <span class="font-semibold text-slate-400">Match ID: ${match.id} | ${kickoff.toLocaleDateString([], {month: 'short', day: 'numeric'})}</span>
+                    <div class="flex justify-between items-center text-xs text-slate-500 border-b border-slate-800 pb-3 font-mono">
+                        <span class="font-semibold">Match ID: ${match.id} | ${kickoff.toLocaleDateString([], {month: 'short', day: 'numeric'})}</span>
                         ${accuracyBadge}
                     </div>
 
-                    <!-- Comparison Side-by-Side Wrapper -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Comparison Grid Sheets -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-0 border border-slate-800 rounded-lg overflow-hidden">
                         
-                        <!-- LEFT COLUMN: AI Prediction -->
-                        <div class="bg-slate-950/40 border border-slate-800/60 p-4 rounded-xl flex flex-col justify-between">
-                            <div>
-                                <h4 class="text-indigo-400 text-xs font-bold uppercase tracking-wider mb-3">🔮 AI PREDICTION</h4>
-                                
-                                <div class="grid grid-cols-2 gap-4 mb-4 text-xs">
-                                    <div>
-                                        <span class="text-slate-600 font-bold block uppercase">Winner Forecast</span>
-                                        <span class="text-slate-200 font-bold">${pred ? pred.predicted_winner : "N/A"}</span>
-                                    </div>
-                                    <div>
-                                        <span class="text-slate-600 font-bold block uppercase">Score Forecast</span>
-                                        <span class="text-slate-200 font-bold">${pred ? pred.predicted_score : "N/A"}</span>
-                                    </div>
+                        <!-- FORECAST CONTAINER -->
+                        <div class="comparison-divider p-5 bg-slate-950/20">
+                            <h4 class="text-indigo-400 text-[10px] font-bold uppercase tracking-wider mb-4 font-mono">📊 AI ESTIMATION (T-2H)</h4>
+                            
+                            <div class="grid grid-cols-2 gap-4 mb-4 text-xs font-mono">
+                                <div>
+                                    <span class="text-slate-600 font-bold block text-[9px] uppercase">Winner Forecast</span>
+                                    <span class="text-slate-200 font-bold text-sm block mt-1">${pred ? pred.predicted_winner : "N/A"}</span>
                                 </div>
-
-                                <div class="space-y-2 mt-4">
-                                    <div>
-                                        <span class="text-[10px] font-bold text-slate-600 uppercase">Expected Scorers:</span>
-                                        <div class="flex flex-wrap gap-1 mt-1">${renderBadges(pred ? pred.goalscorers : null, 'soccer')}</div>
-                                    </div>
-                                    <div>
-                                        <span class="text-[10px] font-bold text-slate-600 uppercase">Expected Bookings:</span>
-                                        <div class="flex flex-wrap gap-1 mt-1">${renderBadges(pred ? pred.bookings : null, 'card')}</div>
-                                    </div>
-                                    <div>
-                                        <span class="text-[10px] font-bold text-slate-600 uppercase">Predicted Injuries:</span>
-                                        <div class="flex flex-wrap gap-1 mt-1">${renderBadges(pred ? pred.injuries : null, 'injury')}</div>
-                                    </div>
+                                <div>
+                                    <span class="text-slate-600 font-bold block text-[9px] uppercase">Scoreline Forecast</span>
+                                    <span class="text-slate-200 font-bold text-sm block mt-1">${pred ? pred.predicted_score : "N/A"}</span>
                                 </div>
                             </div>
 
-                            <!-- Expandable citation list inside comparison cards -->
-                            ${pred ? `
-                                <details class="group mt-4 border border-slate-800 rounded-lg overflow-hidden">
-                                    <summary class="list-none flex justify-between items-center p-2 bg-slate-950/80 cursor-pointer text-[10px] font-bold text-slate-400 hover:text-white select-none">
-                                        <span>📚 VIEW WEB RESEARCH SOURCES</span>
-                                        <span class="transition group-open:rotate-180">▼</span>
-                                    </summary>
-                                    <div class="p-3 bg-slate-950/20 border-t border-slate-800">
-                                        ${renderCitationsList(pred.grounding_sources)}
-                                    </div>
-                                </details>
-                            ` : ''}
+                            <div class="space-y-2 mt-4 text-xs border-t border-slate-850/80 pt-4">
+                                <div class="flex justify-between py-0.5">
+                                    <span class="text-slate-500 font-medium">Scorers</span>
+                                    <div class="flex flex-wrap gap-1 max-w-[70%] justify-end">${renderBadges(pred ? pred.goalscorers : null, 'soccer')}</div>
+                                </div>
+                                <div class="flex justify-between py-0.5">
+                                    <span class="text-slate-500 font-medium">Bookings</span>
+                                    <div class="flex flex-wrap gap-1 max-w-[70%] justify-end">${renderBadges(pred ? pred.bookings : null, 'card')}</div>
+                                </div>
+                                <div class="flex justify-between py-0.5">
+                                    <span class="text-slate-500 font-medium">Injuries</span>
+                                    <div class="flex flex-wrap gap-1 max-w-[70%] justify-end">${renderBadges(pred ? pred.injuries : null, 'injury')}</div>
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- RIGHT COLUMN: Actual Result (Ground Truth) -->
-                        <div class="bg-slate-950/40 border border-slate-800/60 p-4 rounded-xl">
-                            <h4 class="text-amber-500 text-xs font-bold uppercase tracking-wider mb-3">🎯 ACTUAL MATCH OUTCOME</h4>
+                        <!-- GROUND TRUTH CONTAINER -->
+                        <div class="p-5 bg-slate-950/40">
+                            <h4 class="text-amber-500 text-[10px] font-bold uppercase tracking-wider mb-4 font-mono">🎯 OFFICIAL OUTCOME</h4>
                             
-                            <div class="grid grid-cols-2 gap-4 mb-4 text-xs">
+                            <div class="grid grid-cols-2 gap-4 mb-4 text-xs font-mono">
                                 <div>
-                                    <span class="text-slate-600 font-bold block uppercase">Official Winner</span>
-                                    <span class="text-slate-200 font-bold">${real ? real.actual_winner : "Pending Verification"}</span>
+                                    <span class="text-slate-600 font-bold block text-[9px] uppercase">Confirmed Winner</span>
+                                    <span class="text-slate-200 font-bold text-sm block mt-1">${real ? real.actual_winner : "Pending Verification"}</span>
                                 </div>
                                 <div>
-                                    <span class="text-slate-600 font-bold block uppercase">Official Score</span>
-                                    <span class="text-slate-200 font-bold">${real ? real.actual_score : "Pending"}</span>
+                                    <span class="text-slate-600 font-bold block text-[9px] uppercase">Official Score</span>
+                                    <span class="text-slate-200 font-bold text-sm block mt-1">${real ? real.actual_score : "Pending"}</span>
                                 </div>
                             </div>
 
-                            <div class="space-y-2 mt-4">
-                                <div>
-                                    <span class="text-[10px] font-bold text-slate-600 uppercase">Real Scorers:</span>
-                                    <div class="flex flex-wrap gap-1 mt-1">${renderBadges(real ? real.goalscorers : null, 'soccer')}</div>
+                            <div class="space-y-2 mt-4 text-xs border-t border-slate-850/80 pt-4">
+                                <div class="flex justify-between py-0.5">
+                                    <span class="text-slate-500 font-medium">Real Scorers</span>
+                                    <div class="flex flex-wrap gap-1 max-w-[70%] justify-end">${renderBadges(real ? real.goalscorers : null, 'soccer')}</div>
                                 </div>
-                                <div>
-                                    <span class="text-[10px] font-bold text-slate-600 uppercase">Real Bookings:</span>
-                                    <div class="flex flex-wrap gap-1 mt-1">${renderBadges(real ? real.bookings : null, 'card')}</div>
+                                <div class="flex justify-between py-0.5">
+                                    <span class="text-slate-500 font-medium">Real Bookings</span>
+                                    <div class="flex flex-wrap gap-1 max-w-[70%] justify-end">${renderBadges(real ? real.bookings : null, 'card')}</div>
                                 </div>
-                                <div>
-                                    <span class="text-[10px] font-bold text-slate-600 uppercase">Real Injuries:</span>
-                                    <div class="flex flex-wrap gap-1 mt-1">${renderBadges(real ? real.injuries : null, 'injury')}</div>
+                                <div class="flex justify-between py-0.5">
+                                    <span class="text-slate-500 font-medium">Real Injuries</span>
+                                    <div class="flex flex-wrap gap-1 max-w-[70%] justify-end">${renderBadges(real ? real.injuries : null, 'injury')}</div>
                                 </div>
                             </div>
                         </div>
 
                     </div>
+
+                    <!-- Collapsible Grounded Research Metrics -->
+                    ${pred ? `
+                        <details class="group border border-slate-800 rounded bg-slate-950/20 overflow-hidden">
+                            <summary class="list-none flex justify-between items-center p-3 cursor-pointer text-xs font-bold text-slate-400 hover:text-white select-none font-mono">
+                                <span>📄 VIEW RECORDED RESEARCH DATA & CITATIONS</span>
+                                <span class="transition group-open:rotate-180">▼</span>
+                            </summary>
+                            <div class="p-4 border-t border-slate-800 text-slate-300 text-xs leading-relaxed space-y-4">
+                                <div class="space-y-2">
+                                    <span class="text-[9px] font-bold text-indigo-400 uppercase tracking-wider block font-mono">Grounded Match Analysis Briefing:</span>
+                                    <p class="whitespace-pre-line">${pred.raw_analysis}</p>
+                                </div>
+                                ${renderCitations(pred.grounding_sources)}
+                            </div>
+                        </details>
+                    ` : ''}
                 `;
                 grid.appendChild(card);
             });
 
-            // Manage Lazy loading button display limits
+            // Lazy Loader triggers
             const loadMoreBtn = document.getElementById('load-more-btn');
             if (filteredMatches.length > itemsToShow) {
                 document.getElementById('lazy-load-container').classList.remove('hidden');
@@ -455,7 +485,7 @@
          */
         function renderBadges(arr, type) {
             if (!arr || !Array.isArray(arr) || arr.length === 0) {
-                return `<span class="text-slate-700 text-[10px]">None recorded</span>`;
+                return `<span class="text-slate-700 text-[10px]">None</span>`;
             }
 
             return arr.map(item => {
@@ -463,20 +493,20 @@
                 if (item.minute) text += ` (${item.minute}')`;
                 if (item.type) text += ` [${item.type}]`;
 
-                let colors = "bg-slate-900/80 text-slate-400";
-                if (type === 'soccer') colors = "bg-emerald-500/10 text-emerald-300 border border-emerald-500/20";
-                if (type === 'assist') colors = "bg-blue-500/10 text-blue-300 border border-blue-500/20";
-                if (type === 'card') colors = "bg-amber-500/10 text-amber-300 border border-amber-500/20";
-                if (type === 'injury') colors = "bg-rose-500/10 text-rose-300 border border-rose-500/20";
+                let colors = "bg-slate-900 text-slate-400";
+                if (type === 'soccer') colors = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+                if (type === 'assist') colors = "bg-blue-500/10 text-blue-400 border border-blue-500/20";
+                if (type === 'card') colors = "bg-amber-500/10 text-amber-400 border border-amber-500/20";
+                if (type === 'injury') colors = "bg-rose-500/10 text-rose-400 border border-rose-500/20";
 
-                return `<span class="px-2 py-0.5 rounded text-[10px] font-medium ${colors}">${text}</span>`;
+                return `<span class="px-2 py-0.5 rounded text-[10px] font-semibold font-mono ${colors}">${text}</span>`;
             }).join('');
         }
 
         /**
-         * Helper: Parses the Gemini grounding metadata and renders clean bibliographic link chips
+         * Helper: Extracts research citations URLs and renders them as standard academic tags
          */
-        function renderCitationsList(sources) {
+        function renderCitations(sources) {
             if (!sources || !sources.groundingChunks || !Array.isArray(sources.groundingChunks)) {
                 return `<p class="text-slate-600 text-[10px] italic">No live search citations captured for this test run.</p>`;
             }
@@ -491,29 +521,29 @@
                 const title = chunk.web.title || "Research Source Link";
                 const uri = chunk.web.uri;
                 return `
-                    <a href="${uri}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 px-2 py-1 rounded text-[10px] font-medium transition-colors max-w-full truncate">
+                    <a href="${uri}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded text-[10px] font-medium transition-colors max-w-full truncate font-mono">
                         🔗 ${title}
                     </a>
                 `;
             }).join('');
 
             return `
-                <div class="mt-2">
-                    <span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">📚 Verified Web Research Citations:</span>
-                    <div class="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto pr-1">
+                <div class="mt-2 border-t border-slate-800 pt-3">
+                    <span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider block mb-2 font-mono">📚 VERIFIED SEARCH GROUNDING BIBLIOGRAPHY:</span>
+                    <div class="flex flex-wrap gap-2 max-h-32 overflow-y-auto pr-1">
                         ${linksHtml}
                     </div>
                 </div>
             `;
         }
 
-        // Trigger Filters on select changes
+        // Filters listeners
         document.getElementById('search-input').addEventListener('input', applyFilters);
         document.getElementById('filter-select').addEventListener('change', applyFilters);
 
-        // Handle Lazy Load click updates
+        // Load More Pagination listeners
         document.getElementById('load-more-btn').addEventListener('click', () => {
-            itemsToShow += 4; // Add 4 more items to the view stack
+            itemsToShow += 4; 
             renderArchive();
         });
 
