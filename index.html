@@ -106,7 +106,7 @@
             if (Array.isArray(data)) {
                 return data.length > 0 ? data[0] : null;
             }
-            return data; // Return object directly if it's already a single object map
+            return data; 
         }
 
         /**
@@ -114,8 +114,7 @@
          */
         async function loadDashboardData() {
             try {
-                // We add a random cache-busting timestamp (?t=...) to force the browser 
-                // to pull fresh data from your database rather than loading cached RLS states
+                // Fetch fresh data securely with no API keys exposed
                 const response = await fetch(`/api/data?t=${Date.now()}`);
                 
                 if (!response.ok) {
@@ -156,14 +155,13 @@
                 
                 const diffHours = (kickoff.getTime() - now.getTime()) / (1000 * 60 * 60);
                 
-                // Filters out past historical test rows from the live window
                 return !isCompleted && diffHours > -3;
             });
 
             if (upcoming.length === 0) {
                 container.innerHTML = `
                     <p class="text-center text-slate-500 py-6 text-sm">
-                        No active upcoming fixtures found in the 2.5-hour predictive window.
+                        No active upcoming fixtures found in the database.
                     </p>
                 `;
                 return;
@@ -237,8 +235,9 @@
                                     <span>🔍 VIEW AI GROUNDED RESEARCH ANALYSIS</span>
                                     <span class="transition group-open:rotate-180">▼</span>
                                 </summary>
-                                <div class="p-4 bg-slate-950/30 text-slate-400 text-xs leading-relaxed max-h-48 overflow-y-auto border-t border-slate-800">
-                                    ${pred.raw_analysis}
+                                <div class="p-4 bg-slate-950/30 text-slate-400 text-xs leading-relaxed border-t border-slate-800 space-y-4">
+                                    <p>${pred.raw_analysis}</p>
+                                    ${renderCitationsList(pred.grounding_sources)}
                                 </div>
                             </details>
                         </div>
@@ -360,34 +359,49 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         
                         <!-- LEFT COLUMN: AI Prediction -->
-                        <div class="bg-slate-950/40 border border-slate-800/60 p-4 rounded-xl">
-                            <h4 class="text-indigo-400 text-xs font-bold uppercase tracking-wider mb-3">🔮 AI PREDICTION</h4>
-                            
-                            <div class="grid grid-cols-2 gap-4 mb-4 text-xs">
-                                <div>
-                                    <span class="text-slate-600 font-bold block uppercase">Winner Forecast</span>
-                                    <span class="text-slate-200 font-bold">${pred ? pred.predicted_winner : "N/A"}</span>
+                        <div class="bg-slate-950/40 border border-slate-800/60 p-4 rounded-xl flex flex-col justify-between">
+                            <div>
+                                <h4 class="text-indigo-400 text-xs font-bold uppercase tracking-wider mb-3">🔮 AI PREDICTION</h4>
+                                
+                                <div class="grid grid-cols-2 gap-4 mb-4 text-xs">
+                                    <div>
+                                        <span class="text-slate-600 font-bold block uppercase">Winner Forecast</span>
+                                        <span class="text-slate-200 font-bold">${pred ? pred.predicted_winner : "N/A"}</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-600 font-bold block uppercase">Score Forecast</span>
+                                        <span class="text-slate-200 font-bold">${pred ? pred.predicted_score : "N/A"}</span>
+                                    </div>
                                 </div>
-                                <div>
-                                    <span class="text-slate-600 font-bold block uppercase">Score Forecast</span>
-                                    <span class="text-slate-200 font-bold">${pred ? pred.predicted_score : "N/A"}</span>
+
+                                <div class="space-y-2 mt-4">
+                                    <div>
+                                        <span class="text-[10px] font-bold text-slate-600 uppercase">Expected Scorers:</span>
+                                        <div class="flex flex-wrap gap-1 mt-1">${renderBadges(pred ? pred.goalscorers : null, 'soccer')}</div>
+                                    </div>
+                                    <div>
+                                        <span class="text-[10px] font-bold text-slate-600 uppercase">Expected Bookings:</span>
+                                        <div class="flex flex-wrap gap-1 mt-1">${renderBadges(pred ? pred.bookings : null, 'card')}</div>
+                                    </div>
+                                    <div>
+                                        <span class="text-[10px] font-bold text-slate-600 uppercase">Predicted Injuries:</span>
+                                        <div class="flex flex-wrap gap-1 mt-1">${renderBadges(pred ? pred.injuries : null, 'injury')}</div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="space-y-2 mt-4">
-                                <div>
-                                    <span class="text-[10px] font-bold text-slate-600 uppercase">Expected Scorers:</span>
-                                    <div class="flex flex-wrap gap-1 mt-1">${renderBadges(pred ? pred.goalscorers : null, 'soccer')}</div>
-                                </div>
-                                <div>
-                                    <span class="text-[10px] font-bold text-slate-600 uppercase">Expected Bookings:</span>
-                                    <div class="flex flex-wrap gap-1 mt-1">${renderBadges(pred ? pred.bookings : null, 'card')}</div>
-                                </div>
-                                <div>
-                                    <span class="text-[10px] font-bold text-slate-600 uppercase">Predicted Injuries:</span>
-                                    <div class="flex flex-wrap gap-1 mt-1">${renderBadges(pred ? pred.injuries : null, 'injury')}</div>
-                                </div>
-                            </div>
+                            <!-- Expandable citation list inside comparison cards -->
+                            ${pred ? `
+                                <details class="group mt-4 border border-slate-800 rounded-lg overflow-hidden">
+                                    <summary class="list-none flex justify-between items-center p-2 bg-slate-950/80 cursor-pointer text-[10px] font-bold text-slate-400 hover:text-white select-none">
+                                        <span>📚 VIEW WEB RESEARCH SOURCES</span>
+                                        <span class="transition group-open:rotate-180">▼</span>
+                                    </summary>
+                                    <div class="p-3 bg-slate-950/20 border-t border-slate-800">
+                                        ${renderCitationsList(pred.grounding_sources)}
+                                    </div>
+                                </details>
+                            ` : ''}
                         </div>
 
                         <!-- RIGHT COLUMN: Actual Result (Ground Truth) -->
@@ -457,6 +471,40 @@
 
                 return `<span class="px-2 py-0.5 rounded text-[10px] font-medium ${colors}">${text}</span>`;
             }).join('');
+        }
+
+        /**
+         * Helper: Parses the Gemini grounding metadata and renders clean bibliographic link chips
+         */
+        function renderCitationsList(sources) {
+            if (!sources || !sources.groundingChunks || !Array.isArray(sources.groundingChunks)) {
+                return `<p class="text-slate-600 text-[10px] italic">No live search citations captured for this test run.</p>`;
+            }
+
+            const validChunks = sources.groundingChunks.filter(chunk => chunk.web && chunk.web.uri);
+
+            if (validChunks.length === 0) {
+                return `<p class="text-slate-600 text-[10px] italic">No live search citations captured for this test run.</p>`;
+            }
+
+            const linksHtml = validChunks.map(chunk => {
+                const title = chunk.web.title || "Research Source Link";
+                const uri = chunk.web.uri;
+                return `
+                    <a href="${uri}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 px-2 py-1 rounded text-[10px] font-medium transition-colors max-w-full truncate">
+                        🔗 ${title}
+                    </a>
+                `;
+            }).join('');
+
+            return `
+                <div class="mt-2">
+                    <span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">📚 Verified Web Research Citations:</span>
+                    <div class="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto pr-1">
+                        ${linksHtml}
+                    </div>
+                </div>
+            `;
         }
 
         // Trigger Filters on select changes
