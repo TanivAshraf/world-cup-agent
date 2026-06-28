@@ -1,9 +1,8 @@
 /**
- * File 1: predict.js (Grounded Tactical Analysis Version)
+ * File 1: predict.js (Google Search API Updated Version)
  * 
- * This version updates the AI engine prompt to generate a deep, structured,
- * multi-paragraph tactical match briefing detailing teams playstyles,
- * key player movements, and chronological narrative for your research.
+ * This version replaces the deprecated 'google_search_retrieval' tool
+ * with the updated 'google_search' tool specification to resolve HTTP 400 blocks.
  */
 
 const { createClient } = require('@supabase/supabase-js');
@@ -120,7 +119,7 @@ async function syncUpcomingFixtures() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: syncPrompt }] }],
-        tools: [{ google_search_retrieval: {} }],
+        tools: [{ google_search: {} }], // Updated to matching 2026 api toolspec
         generationConfig: { temperature: 0.1 }
       })
     });
@@ -235,7 +234,7 @@ async function syncCompletedResults() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             contents: [{ parts: [{ text: resultPrompt }] }],
-            tools: [{ google_search_retrieval: {} }],
+            tools: [{ google_search: {} }], // Updated to matching 2026 api toolspec
             generationConfig: { temperature: 0.1 }
           })
         });
@@ -322,7 +321,7 @@ async function runPredictionForMatch(match) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: targetPrompt }] }],
-        tools: [{ google_search_retrieval: {} }],
+        tools: [{ google_search: {} }], // Updated to matching 2026 api toolspec
         generationConfig: { temperature: 0.15 }
       })
     });
