@@ -1,16 +1,14 @@
-# File 3: schedule.yml
-# This file configures GitHub Actions to run your predict.js file automatically.
+# File 3: schedule.yml (Updated version)
+# This updated version uses Node 22 and removes caching to support browser-only repos.
 
 name: World Cup 2026 AI Predictor
 
 on:
   schedule:
     # Runs automatically every 30 minutes, 24/7.
-    # This frequent check ensures we catch matches in their T-2 hour window.
     - cron: '*/30 * * * *'
   workflow_dispatch:
     # This enables a "Run workflow" button in the GitHub Actions tab.
-    # You can click it anytime to run predictions manually for testing.
 
 jobs:
   run-predictor:
@@ -21,12 +19,13 @@ jobs:
       - name: Checkout Repository Code
         uses: actions/checkout@v4
 
-      # Step 2: Set up Node.js environment
+      # Step 2: Set up Node.js environment (Upgraded to Node 22)
       - name: Setup Node.js Environment
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: '22'
+          # We have removed the "cache: npm" line. This allows the script to run
+          # perfectly without needing a package-lock.json file.
 
       # Step 3: Install dependencies specified in package.json
       - name: Install Project Dependencies
