@@ -1,16 +1,14 @@
 /**
- * File 1: predict.js (Updated with Autonomous Bracket Syncer)
+ * File 1: predict.js (Ultimate Self-Sustaining Version)
  * 
- * This script runs every 30 minutes. It:
- * 1. Checks if the database is running out of scheduled matches.
- *    If yes, it uses Gemini Search Grounding to automatically discover 
- *    and schedule newly confirmed World Cup matches.
- * 2. Processes pending matches that are within their 2.5-hour kickoff window.
+ * This autonomous agent runs every 30 minutes to:
+ * 1. Discover and schedule new tournament matches (Autonomous Match Syncer).
+ * 2. Fetch and write final scores/events for finished matches (Autonomous Results Syncer).
+ * 3. Generate predictions 2 hours before kickoff with live citations (AI Prediction Pipeline).
  */
 
 const { createClient } = require('@supabase/supabase-js');
 
-// Initialize Supabase Connection
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const geminiApiKey = process.env.GEMINI_API_KEY;
@@ -27,10 +25,13 @@ async function startPredictionWorkflow() {
   console.log("🚀 Starting Prediction Engine...");
   
   try {
-    // 1. Run the Autonomous Bracket Syncer to find new matches
+    // 1. Sync upcoming matches (automatic schedule additions)
     await syncUpcomingFixtures();
 
-    // 2. Fetch matches from your database where Status is 'Pending'
+    // 2. Sync results of completed matches (automatic outcome gathering)
+    await syncCompletedResults();
+
+    // 3. Fetch matches with 'Pending' status to evaluate predictions
     const { data: matches, error: fetchError } = await supabase
       .from('matches')
       .select('*')
@@ -41,7 +42,7 @@ async function startPredictionWorkflow() {
     }
 
     if (!matches || matches.length === 0) {
-      console.log("ℹ️ No 'Pending' matches found in database. Exiting workflow.");
+      console.log("ℹ️ No 'Pending' matches found in database. Exiting prediction phase.");
       return;
     }
 
@@ -56,9 +57,9 @@ async function startPredictionWorkflow() {
       console.log(`🔍 Checking Match ID ${match.id}: ${match.home_team} vs ${match.away_team}`);
       console.log(`   Kickoff Time: ${kickoffTime.toISOString()} (In ${diffHours.toFixed(2)} hours)`);
 
-      // Trigger if match starts in 2.5 hours or less
+      // Window check: Starts predictions strictly between T-2.5 hours and kickoff
       if (diffHours > 0 && diffHours <= 2.5) {
-        console.log(`🎯 Match falls in 2-hour window! Initiating AI prediction pipeline...`);
+        console.log(`🎯 Match falls in active window! Running prediction pipeline...`);
         await runPredictionForMatch(match);
       } else {
         console.log(`⏭️ Match skipped (not inside the 0 to 2.5 hours window).`);
@@ -72,22 +73,19 @@ async function startPredictionWorkflow() {
 }
 
 /**
- * Autonomous Bracket Syncer
- * Uses Gemini Search Grounding to discover newly confirmed fixtures
- * and inserts them into the database without manual human intervention.
+ * FEATURE 1: Autonomous Match Syncer
+ * Automatically discovers newly confirmed World Cup fixtures using Google Search.
  */
 async function syncUpcomingFixtures() {
   console.log("🔍 Checking if database schedule requires autonomous syncing...");
 
   try {
-    // Fetch all existing matches currently in the database to prevent duplicates
     const { data: existingMatches, error: matchFetchError } = await supabase
       .from('matches')
       .select('home_team, away_team, kickoff_time');
 
     if (matchFetchError) throw matchFetchError;
 
-    // Filter to find upcoming pending matches
     const { data: pendingMatches, error: pendingFetchError } = await supabase
       .from('matches')
       .select('*')
@@ -95,15 +93,13 @@ async function syncUpcomingFixtures() {
 
     if (pendingFetchError) throw pendingFetchError;
 
-    // If we have 3 or more pending matches scheduled, we don't need to query the API (saves tokens)
     if (pendingMatches && pendingMatches.length >= 3) {
       console.log(`ℹ️ Database has ${pendingMatches.length} pending fixtures scheduled. No syncing required.`);
       return;
     }
 
-    console.log("⚠️ Low pending fixtures detected. Triggering Gemini to discover next round matches...");
+    console.log("⚠️ Low pending fixtures detected. Syncing future rounds...");
 
-    // Format list of existing matches so Gemini knows what is already scheduled
     const existingList = existingMatches.map(m => `${m.home_team} vs ${m.away_team} (${m.kickoff_time})`).join('\n');
 
     const syncPrompt = `
@@ -112,7 +108,7 @@ async function syncUpcomingFixtures() {
       
       ${existingList}
 
-      Your task is to identify confirmed upcoming matches and return them in this raw JSON array format, without markdown backticks:
+      Return newly identified matches in this raw JSON array format, without markdown backticks:
       [
         {"home_team": "Team A", "away_team": "Team B", "kickoff_time": "YYYY-MM-DD HH:MM:SS+00"}
       ]
@@ -141,7 +137,6 @@ async function syncUpcomingFixtures() {
     const jsonResponse = JSON.parse(rawText);
     let generatedText = jsonResponse.candidates[0].content.parts[0].text.trim();
 
-    // Clean JSON formatting
     if (generatedText.startsWith("```")) {
       const matchRegex = generatedText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
       if (matchRegex && matchRegex[1]) {
@@ -155,7 +150,6 @@ async function syncUpcomingFixtures() {
       console.log(`✨ Found ${newMatches.length} new confirmed matches. Saving to database...`);
       
       for (const newMatch of newMatches) {
-        // Prevent duplicate insertions
         const isDuplicate = existingMatches.some(em => 
           em.home_team.toLowerCase() === newMatch.home_team.toLowerCase() && 
           em.away_team.toLowerCase() === newMatch.away_team.toLowerCase()
@@ -179,16 +173,125 @@ async function syncUpcomingFixtures() {
         }
       }
     } else {
-      console.log("ℹ️ No newly confirmed upcoming matches found online yet.");
+      console.log("ℹ]. No newly confirmed upcoming matches found online yet.");
     }
 
   } catch (syncError) {
-    console.error("⚠️ Autonomous Syncing Warning (Script will still attempt to predict existing matches):", syncError.message);
+    console.error("⚠️ Autonomous Syncing Warning:", syncError.message);
   }
 }
 
 /**
- * Handles the prediction pipeline for a single row index.
+ * FEATURE 2: Autonomous Results Syncer
+ * Searches Google for finished matches and automatically writes official scores/stats to results.
+ */
+async function syncCompletedResults() {
+  console.log("🔍 Checking for finished matches missing outcome data...");
+
+  try {
+    // Select matches marked 'Completed' (which means we finished predictions)
+    const { data: completedMatches, error: fetchError } = await supabase
+      .from('matches')
+      .select('*, results(*)');
+
+    if (fetchError) throw fetchError;
+
+    // Filter to find matches that have been predicted but have NO row in the results table yet
+    const pendingResults = completedMatches.filter(m => {
+      if (m.status !== "Completed") return false;
+      const resultsArray = m.results || [];
+      return resultsArray.length === 0;
+    });
+
+    if (pendingResults.length === 0) {
+      console.log("ℹ️ No finished matches missing results data. Skipping outcome sync.");
+      return;
+    }
+
+    console.log(`📈 Found ${pendingResults.length} matches waiting for actual results...`);
+
+    for (const match of pendingResults) {
+      const kickoffTime = new Date(match.kickoff_time);
+      const now = new Date();
+      const hoursSinceKickoff = (now.getTime() - kickoffTime.getTime()) / (1000 * 60 * 60);
+
+      // Only attempt to pull outcome data if at least 3.5 hours have passed since kickoff
+      if (hoursSinceKickoff > 3.5) {
+        console.log(`📡 Fetching official outcomes for: ${match.home_team} vs ${match.away_team}...`);
+
+        const resultPrompt = `
+          Search the web for the official final result of the FIFA World Cup 2026 match between: ${match.home_team} vs ${match.away_team}.
+          The match kicked off around: ${match.kickoff_time}.
+
+          Your task is to compile the official final statistics of the match in this raw JSON format, without backticks:
+          {
+            "winner": "Winning team name (or Draw)",
+            "score": "Final score line (e.g., 2-1)",
+            "goalscorers": [{"player": "Player Name", "minute": "Actual minute"}],
+            "assists": [{"player": "Player Name", "minute": "Actual minute"}],
+            "bookings": [{"player": "Player Name", "type": "Yellow" or "Red", "minute": "Actual minute"}],
+            "injuries": [{"player": "Player Name", "minute": "Actual minute"}],
+            "clean_sheets": {"home": true_or_false, "away": true_or_false}
+          }
+        `;
+
+        const apiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${geminiApiKey}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: resultPrompt }] }],
+            tools: [{ google_search_retrieval: {} }],
+            generationConfig: { temperature: 0.1 }
+          })
+        });
+
+        const rawText = await apiResponse.text();
+        if (apiResponse.status !== 200) throw new Error(`Results API failed: ${rawText}`);
+
+        const jsonResponse = JSON.parse(rawText);
+        let generatedText = jsonResponse.candidates[0].content.parts[0].text.trim();
+
+        if (generatedText.startsWith("```")) {
+          const matchRegex = generatedText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+          if (matchRegex && matchRegex[1]) {
+            generatedText = matchRegex[1].trim();
+          }
+        }
+
+        const parsedResult = JSON.parse(generatedText);
+
+        // Save official results to database
+        const { error: insertError } = await supabase
+          .from('results')
+          .insert({
+            match_id: match.id,
+            actual_winner: parsedResult.winner,
+            actual_score: parsedResult.score,
+            goalscorers: parsedResult.goalscorers,
+            assists: parsedResult.assists,
+            bookings: parsedResult.bookings,
+            injuries: parsedResult.injuries,
+            clean_sheets: parsedResult.clean_sheets
+          });
+
+        if (insertError) {
+          console.error(`Failed to save results for Match ID ${match.id}:`, insertError.message);
+        } else {
+          console.log(`🏆 Successfully compiled results for: ${match.home_team} vs ${match.away_team}`);
+        }
+      } else {
+        console.log(`⏳ Skipping outcome check for ${match.home_team} vs ${match.away_team} (match is currently in progress).`);
+      }
+    }
+
+  } catch (error) {
+    console.error("⚠️ Results Syncer Error:", error.message);
+  }
+}
+
+/**
+ * FEATURE 3: Prediction Compiler with Source Harvesting
+ * Pulls predictions and extracts the exact Google search queries and source URLs used.
  */
 async function runPredictionForMatch(match) {
   await supabase
@@ -240,6 +343,10 @@ async function runPredictionForMatch(match) {
 
     const jsonResponse = JSON.parse(rawText);
     const generatedText = jsonResponse.candidates[0].content.parts[0].text;
+    
+    // Extract Search Citation metadata
+    const groundingMetadata = jsonResponse.candidates[0].groundingMetadata || null;
+
     console.log("⚡ Prediction received. Cleaning response contents...");
 
     let cleanText = generatedText.trim();
@@ -268,7 +375,7 @@ async function runPredictionForMatch(match) {
       };
     }
 
-    console.log(`💾 Storing predictions to database...`);
+    console.log(`💾 Storing predictions and research sources to database...`);
     const { error: insertError } = await supabase
       .from('predictions')
       .upsert({
@@ -281,7 +388,8 @@ async function runPredictionForMatch(match) {
         injuries: parsed.injuries,
         clean_sheets: parsed.clean_sheets,
         fantasy_tips: parsed.fantasy_tips,
-        raw_analysis: parsed.analysis
+        raw_analysis: parsed.analysis,
+        grounding_sources: groundingMetadata // Store research citations safely
       });
 
     if (insertError) {
