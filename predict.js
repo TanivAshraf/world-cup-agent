@@ -1,10 +1,9 @@
 /**
- * File 1: predict.js (Ultimate Self-Sustaining Version)
+ * File 1: predict.js (Grounded Tactical Analysis Version)
  * 
- * This autonomous agent runs every 30 minutes to:
- * 1. Discover and schedule new tournament matches (Autonomous Match Syncer).
- * 2. Fetch and write final scores/events for finished matches (Autonomous Results Syncer).
- * 3. Generate predictions 2 hours before kickoff with live citations (AI Prediction Pipeline).
+ * This version updates the AI engine prompt to generate a deep, structured,
+ * multi-paragraph tactical match briefing detailing teams playstyles,
+ * key player movements, and chronological narrative for your research.
  */
 
 const { createClient } = require('@supabase/supabase-js');
@@ -62,7 +61,7 @@ async function startPredictionWorkflow() {
         console.log(`🎯 Match falls in active window! Running prediction pipeline...`);
         await runPredictionForMatch(match);
       } else {
-        console.log(`⏭️ Match skipped (not inside the 0 to 2.5 hours window).`);
+        console.log("⏭️ Match skipped (not inside the 0 to 2.5 hours window).");
       }
     }
 
@@ -74,7 +73,6 @@ async function startPredictionWorkflow() {
 
 /**
  * FEATURE 1: Autonomous Match Syncer
- * Automatically discovers newly confirmed World Cup fixtures using Google Search.
  */
 async function syncUpcomingFixtures() {
   console.log("🔍 Checking if database schedule requires autonomous syncing...");
@@ -173,7 +171,7 @@ async function syncUpcomingFixtures() {
         }
       }
     } else {
-      console.log("ℹ]. No newly confirmed upcoming matches found online yet.");
+      console.log("ℹ️ No newly confirmed upcoming matches found online yet.");
     }
 
   } catch (syncError) {
@@ -183,20 +181,17 @@ async function syncUpcomingFixtures() {
 
 /**
  * FEATURE 2: Autonomous Results Syncer
- * Searches Google for finished matches and automatically writes official scores/stats to results.
  */
 async function syncCompletedResults() {
   console.log("🔍 Checking for finished matches missing outcome data...");
 
   try {
-    // Select matches marked 'Completed' (which means we finished predictions)
     const { data: completedMatches, error: fetchError } = await supabase
       .from('matches')
       .select('*, results(*)');
 
     if (fetchError) throw fetchError;
 
-    // Filter to find matches that have been predicted but have NO row in the results table yet
     const pendingResults = completedMatches.filter(m => {
       if (m.status !== "Completed") return false;
       const resultsArray = m.results || [];
@@ -215,7 +210,7 @@ async function syncCompletedResults() {
       const now = new Date();
       const hoursSinceKickoff = (now.getTime() - kickoffTime.getTime()) / (1000 * 60 * 60);
 
-      // Only attempt to pull outcome data if at least 3.5 hours have passed since kickoff
+      // Outcome check: Only run if 3.5 hours have passed since kickoff
       if (hoursSinceKickoff > 3.5) {
         console.log(`📡 Fetching official outcomes for: ${match.home_team} vs ${match.away_team}...`);
 
@@ -260,7 +255,6 @@ async function syncCompletedResults() {
 
         const parsedResult = JSON.parse(generatedText);
 
-        // Save official results to database
         const { error: insertError } = await supabase
           .from('results')
           .insert({
@@ -290,8 +284,7 @@ async function syncCompletedResults() {
 }
 
 /**
- * FEATURE 3: Prediction Compiler with Source Harvesting
- * Pulls predictions and extracts the exact Google search queries and source URLs used.
+ * FEATURE 3: Prediction Compiler with Grounded Tactical Briefing
  */
 async function runPredictionForMatch(match) {
   await supabase
@@ -316,7 +309,7 @@ async function runPredictionForMatch(match) {
         "injuries": [{"player": "Player Name", "minute": "Estimated minute"}],
         "clean_sheets": {"home": true_or_false, "away": true_or_false},
         "fantasy_tips": "A couple of sentences outlining the best players to captain, safe picks, and potential differential options for official FIFA Fantasy.",
-        "analysis": "A detailed 1-2 paragraph research-grade breakdown of line-up trends, injuries, tactical reasons, or social sentiments that justify these choices."
+        "analysis": "Provide a comprehensive, multi-paragraph tactical briefing. You must detail: 1) Tactical Playstyles: How both teams will set up (e.g., possession-based structures, defensive lines, or counter-attacking block systems). 2) Player Dynamics: Specific roles on who will do what (e.g., wingers overloading half-spaces or specific structural matchups). 3) Chronological Narrative: How you project the match flow to evolve over 90 minutes (e.g., quiet first halves, late substitution transitions, or physical escalation)."
       }
 
       Do not output any introductory or conversational text, and do not wrap your JSON in backticks. Return the raw JSON block directly.
@@ -343,8 +336,6 @@ async function runPredictionForMatch(match) {
 
     const jsonResponse = JSON.parse(rawText);
     const generatedText = jsonResponse.candidates[0].content.parts[0].text;
-    
-    // Extract Search Citation metadata
     const groundingMetadata = jsonResponse.candidates[0].groundingMetadata || null;
 
     console.log("⚡ Prediction received. Cleaning response contents...");
@@ -375,7 +366,7 @@ async function runPredictionForMatch(match) {
       };
     }
 
-    console.log(`💾 Storing predictions and research sources to database...`);
+    console.log(`💾 Storing predictions to database...`);
     const { error: insertError } = await supabase
       .from('predictions')
       .upsert({
@@ -389,7 +380,7 @@ async function runPredictionForMatch(match) {
         clean_sheets: parsed.clean_sheets,
         fantasy_tips: parsed.fantasy_tips,
         raw_analysis: parsed.analysis,
-        grounding_sources: groundingMetadata // Store research citations safely
+        grounding_sources: groundingMetadata
       });
 
     if (insertError) {
