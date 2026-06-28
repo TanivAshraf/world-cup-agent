@@ -94,17 +94,29 @@
 
     <!-- Interactive logic script -->
     <script>
-        // Global variables to store memory state
         let allMatches = [];
         let filteredMatches = [];
         let itemsToShow = 4; // Initial lazy loading chunk size
+
+        /**
+         * Safely extracts a child relation object from either an array or single object format
+         */
+        function extractRelation(data) {
+            if (!data) return null;
+            if (Array.isArray(data)) {
+                return data.length > 0 ? data[0] : null;
+            }
+            return data; // Return object directly if it's already a single object map
+        }
 
         /**
          * Pulls data securely from Vercel Serverless Function Proxy.
          */
         async function loadDashboardData() {
             try {
-                const response = await fetch('/api/data');
+                // We add a random cache-busting timestamp (?t=...) to force the browser 
+                // to pull fresh data from your database rather than loading cached RLS states
+                const response = await fetch(`/api/data?t=${Date.now()}`);
                 
                 if (!response.ok) {
                     throw new Error(`Failed to contact API gateway (HTTP ${response.status})`);
@@ -112,10 +124,8 @@
 
                 allMatches = await response.json();
                 
-                // DIAGNOSTIC LOG: This prints the exact database payload in your browser console!
                 console.log("📊 RAW DATABASE PAYLOAD FETCHED:", allMatches);
                 
-                // Process the active match first, then process archive filters
                 renderLivePredictiveWindow();
                 applyFilters();
 
@@ -141,12 +151,12 @@
             // Find upcoming matches (NOT completed, and kickoff is either in the future OR started within the last 3 hours)
             const upcoming = allMatches.filter(m => {
                 const kickoff = new Date(m.kickoff_time);
-                const resultsArray = m.results || [];
-                const isCompleted = resultsArray.length > 0;
+                const real = extractRelation(m.results);
+                const isCompleted = real !== null;
                 
                 const diffHours = (kickoff.getTime() - now.getTime()) / (1000 * 60 * 60);
                 
-                // Filters out old, past test games from showing up here
+                // Filters out past historical test rows from the live window
                 return !isCompleted && diffHours > -3;
             });
 
@@ -164,8 +174,7 @@
             const kickoff = new Date(targetMatch.kickoff_time);
             const diffHours = (kickoff.getTime() - now.getTime()) / (1000 * 60 * 60);
 
-            const predictionsArray = targetMatch.predictions || [];
-            const pred = predictionsArray.length > 0 ? predictionsArray[0] : null;
+            const pred = extractRelation(targetMatch.predictions);
 
             // Render based on time constraint: Unlocks if T-2.5 hours or closer
             if (diffHours <= 2.5 && diffHours > -3) {
@@ -272,10 +281,10 @@
             const searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
             const filterValue = document.getElementById('filter-select').value;
 
-            // Only archive matches that have a completed result loaded in results table
+            // Only archive matches that have a completed result loaded
             let list = allMatches.filter(m => {
-                const resultsArray = m.results || [];
-                return resultsArray.length > 0;
+                const real = extractRelation(m.results);
+                return real !== null;
             });
 
             // Filter 1: Name search
@@ -289,12 +298,12 @@
             // Filter 2: AI prediction accuracy filter
             if (filterValue !== "all") {
                 list = list.filter(m => {
-                    const predictionsArray = m.predictions || [];
-                    const resultsArray = m.results || [];
-                    if (predictionsArray.length === 0 || resultsArray.length === 0) return false;
+                    const pred = extractRelation(m.predictions);
+                    const real = extractRelation(m.results);
+                    if (!pred || !real) return false;
 
-                    const predWinner = predictionsArray[0].predicted_winner.toLowerCase().trim();
-                    const realWinner = resultsArray[0].actual_winner.toLowerCase().trim();
+                    const predWinner = pred.predicted_winner.toLowerCase().trim();
+                    const realWinner = real.actual_winner.toLowerCase().trim();
 
                     const isCorrect = predWinner === realWinner;
                     return filterValue === "correct" ? isCorrect : !isCorrect;
@@ -326,11 +335,8 @@
 
             matchesToRender.forEach(match => {
                 const kickoff = new Date(match.kickoff_time);
-                const predictionsArray = match.predictions || [];
-                const resultsArray = match.results || [];
-
-                const pred = predictionsArray[0];
-                const real = resultsArray[0];
+                const pred = extractRelation(match.predictions);
+                const real = extractRelation(match.results);
 
                 // Evaluate outcome correctness for visual badging
                 let accuracyBadge = '';
