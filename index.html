@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-<title> Taniv-Gemini World Cup Predictor </title>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WC 2026 AI Fantasy Agent</title>
+    <title>Taniv-Gemini World Cup Predictor</title>
     <!-- Tailwind CSS CDN for reactive design -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -18,7 +17,7 @@
     <!-- Header Section -->
     <header class="dashboard-gradient border-b border-slate-800 py-8 px-4 text-center">
         <h1 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
-            ⚽ World Cup 2026 AI Fantasy Agent
+            ⚽ Taniv-Gemini World Cup Predictor
         </h1>
         <p class="text-slate-400 mt-2 max-w-2xl mx-auto text-sm md:text-base">
             Real-time sports forecasting agent using search-grounded models. Completely credential-free on the frontend.
@@ -84,7 +83,7 @@
             <div class="text-center mt-10" id="lazy-load-container">
                 <button 
                     id="load-more-btn" 
-                    class="hidden bg-slate-900 hover:bg-slate-850 border border-slate-800 text-slate-300 px-6 py-2.5 rounded-lg text-sm font-semibold transition-colors focus:outline-none"
+                    class="hidden bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 px-6 py-2.5 rounded-lg text-sm font-semibold transition-colors focus:outline-none"
                 >
                     Load More Matches
                 </button>
@@ -102,7 +101,6 @@
 
         /**
          * Pulls data securely from Vercel Serverless Function Proxy.
-         * The HTML file does not know anything about your API keys or URL!
          */
         async function loadDashboardData() {
             try {
@@ -113,6 +111,9 @@
                 }
 
                 allMatches = await response.json();
+                
+                // DIAGNOSTIC LOG: This prints the exact database payload in your browser console!
+                console.log("📊 RAW DATABASE PAYLOAD FETCHED:", allMatches);
                 
                 // Process the active match first, then process archive filters
                 renderLivePredictiveWindow();
@@ -137,18 +138,22 @@
             const container = document.getElementById('live-window-container');
             const now = new Date();
 
-            // Find upcoming matches (matches scheduled in the future or within the last 3 hours, with no result recorded yet)
+            // Find upcoming matches (NOT completed, and kickoff is either in the future OR started within the last 3 hours)
             const upcoming = allMatches.filter(m => {
                 const kickoff = new Date(m.kickoff_time);
                 const resultsArray = m.results || [];
                 const isCompleted = resultsArray.length > 0;
-                return !isCompleted;
+                
+                const diffHours = (kickoff.getTime() - now.getTime()) / (1000 * 60 * 60);
+                
+                // Filters out old, past test games from showing up here
+                return !isCompleted && diffHours > -3;
             });
 
             if (upcoming.length === 0) {
                 container.innerHTML = `
                     <p class="text-center text-slate-500 py-6 text-sm">
-                        No upcoming active fixtures found in database schedule.
+                        No active upcoming fixtures found in the 2.5-hour predictive window.
                     </p>
                 `;
                 return;
@@ -162,8 +167,8 @@
             const predictionsArray = targetMatch.predictions || [];
             const pred = predictionsArray.length > 0 ? predictionsArray[0] : null;
 
-            // Render based on time constraint: Locks predictions until T-2.5 hours
-            if (diffHours <= 2.5) {
+            // Render based on time constraint: Unlocks if T-2.5 hours or closer
+            if (diffHours <= 2.5 && diffHours > -3) {
                 if (pred) {
                     container.innerHTML = `
                         <div>
@@ -193,7 +198,7 @@
                                         </div>
                                     </div>
                                     <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80 text-xs">
-                                        <span class="text-[10px] uppercase font-bold text-indigo-400 block mb-2 tracking-wider">🌟 FIFA Fantasy Tips</span>
+                                        <span class="text-[10px] uppercase font-bold text-indigo-400 block mb-2 tracking-wider">🛡️ Fantasy Agent Picks</span>
                                         <p class="text-slate-300 leading-relaxed">${pred.fantasy_tips}</p>
                                     </div>
                                 </div>
@@ -267,7 +272,7 @@
             const searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
             const filterValue = document.getElementById('filter-select').value;
 
-            // Only archive matches that have a completed result loaded
+            // Only archive matches that have a completed result loaded in results table
             let list = allMatches.filter(m => {
                 const resultsArray = m.results || [];
                 return resultsArray.length > 0;
@@ -297,7 +302,6 @@
             }
 
             filteredMatches = list;
-            itemsToShow = 4; // Reset lazy load tracking index
             renderArchive();
         }
 
