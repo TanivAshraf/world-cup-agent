@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<title> Taniv-Gemini World Cup Predictor </title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WC 2026 AI Fantasy Agent</title>
+    <!-- Tailwind CSS CDN for reactive design -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .dashboard-gradient {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans">
+
+    <!-- Header Section -->
+    <header class="dashboard-gradient border-b border-slate-800 py-8 px-4 text-center">
+        <h1 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
+            ⚽ World Cup 2026 AI Fantasy Agent
+        </h1>
+        <p class="text-slate-400 mt-2 max-w-2xl mx-auto text-sm md:text-base">
+            Real-time sports forecasting agent using search-grounded models. Completely credential-free on the frontend.
+        </p>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-6xl mx-auto px-4 py-8">
+
+        <!-- ========================================== -->
+        <!-- SECTION 1: UPCOMING/ACTIVE MATCH WINDOW    -->
+        <!-- ========================================== -->
+        <section class="mb-12">
+            <h2 class="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                <span class="flex h-3 w-3 relative">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-indigo-500"></span>
+                </span>
+                Active Predictive Window
+            </h2>
+            <div id="live-window-container" class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-2xl">
+                <p class="text-center text-slate-500 py-4">Evaluating next scheduled fixture...</p>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- SECTION 2: THE INTERACTIVE COMPARISON ARCHIVE -->
+        <!-- ========================================== -->
+        <section>
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Match Comparison Archive</h2>
+                    <p class="text-xs text-slate-500 mt-1">Audit predictions side-by-side with official outcomes</p>
+                </div>
+                
+                <!-- Filters Controls -->
+                <div class="flex flex-wrap gap-2 w-full md:w-auto">
+                    <!-- Text Search -->
+                    <input 
+                        type="text" 
+                        id="search-input" 
+                        placeholder="Search team name..." 
+                        class="bg-slate-900 border border-slate-800 px-4 py-2 rounded-lg text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 w-full md:w-48"
+                    />
+                    <!-- Performance Filter -->
+                    <select 
+                        id="filter-select" 
+                        class="bg-slate-900 border border-slate-800 px-4 py-2 rounded-lg text-sm text-slate-300 focus:outline-none focus:border-indigo-500 w-full md:w-auto cursor-pointer"
+                    >
+                        <option value="all">All Matches</option>
+                        <option value="correct">Correct Winner Predicted</option>
+                        <option value="incorrect">Incorrect Winner Predicted</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Comparison Grid -->
+            <div id="archive-grid" class="space-y-6">
+                <!-- Data populated dynamically -->
+            </div>
+
+            <!-- Lazy Loading Controls -->
+            <div class="text-center mt-10" id="lazy-load-container">
+                <button 
+                    id="load-more-btn" 
+                    class="hidden bg-slate-900 hover:bg-slate-850 border border-slate-800 text-slate-300 px-6 py-2.5 rounded-lg text-sm font-semibold transition-colors focus:outline-none"
+                >
+                    Load More Matches
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Interactive logic script -->
+    <script>
+        // Global variables to store memory state
+        let allMatches = [];
+        let filteredMatches = [];
+        let itemsToShow = 4; // Initial lazy loading chunk size
+
+        /**
+         * Pulls data securely from Vercel Serverless Function Proxy.
+         * The HTML file does not know anything about your API keys or URL!
+         */
+        async function loadDashboardData() {
+            try {
+                const response = await fetch('/api/data');
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to contact API gateway (HTTP ${response.status})`);
+                }
+
+                allMatches = await response.json();
+                
+                // Process the active match first, then process archive filters
+                renderLivePredictiveWindow();
+                applyFilters();
+
+            } catch (err) {
+                console.error("Dashboard error:", err);
+                document.getElementById('live-window-container').innerHTML = `
+                    <div class="text-center py-6 text-red-400">
+                        <p class="font-semibold">Unable to fetch dashboard statistics.</p>
+                        <p class="text-xs text-slate-600 mt-1">${err.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        /**
+         * Evaluates the next match kickoff and locks/unlocks predictions
+         * based on the 2.5-hour threshold constraint.
+         */
+        function renderLivePredictiveWindow() {
+            const container = document.getElementById('live-window-container');
+            const now = new Date();
+
+            // Find upcoming matches (matches scheduled in the future or within the last 3 hours, with no result recorded yet)
+            const upcoming = allMatches.filter(m => {
+                const kickoff = new Date(m.kickoff_time);
+                const resultsArray = m.results || [];
+                const isCompleted = resultsArray.length > 0;
+                return !isCompleted;
+            });
+
+            if (upcoming.length === 0) {
+                container.innerHTML = `
+                    <p class="text-center text-slate-500 py-6 text-sm">
+                        No upcoming active fixtures found in database schedule.
+                    </p>
+                `;
+                return;
+            }
+
+            // Target the absolute next game
+            const targetMatch = upcoming[0];
+            const kickoff = new Date(targetMatch.kickoff_time);
+            const diffHours = (kickoff.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+            const predictionsArray = targetMatch.predictions || [];
+            const pred = predictionsArray.length > 0 ? predictionsArray[0] : null;
+
+            // Render based on time constraint: Locks predictions until T-2.5 hours
+            if (diffHours <= 2.5) {
+                if (pred) {
+                    container.innerHTML = `
+                        <div>
+                            <!-- Unlocked Live Prediction Display -->
+                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-800 pb-4 mb-4">
+                                <div>
+                                    <span class="px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-wider">
+                                        🔓 Live Prediction Unlocked
+                                    </span>
+                                    <h3 class="text-slate-400 text-xs mt-2">Kickoff: ${kickoff.toLocaleString()}</h3>
+                                </div>
+                                <div class="text-slate-100 font-bold text-lg">
+                                    ${targetMatch.home_team} <span class="text-slate-600 font-medium text-xs px-2">VS</span> ${targetMatch.away_team}
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-4">
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80">
+                                            <span class="text-[10px] uppercase font-bold text-slate-500 block">AI Expected Winner</span>
+                                            <span class="text-indigo-400 font-bold text-sm block mt-1">${pred.predicted_winner}</span>
+                                        </div>
+                                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80">
+                                            <span class="text-[10px] uppercase font-bold text-slate-500 block">AI Scoreline</span>
+                                            <span class="text-indigo-400 font-bold text-sm block mt-1">${pred.predicted_score}</span>
+                                        </div>
+                                    </div>
+                                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800/80 text-xs">
+                                        <span class="text-[10px] uppercase font-bold text-indigo-400 block mb-2 tracking-wider">🌟 FIFA Fantasy Tips</span>
+                                        <p class="text-slate-300 leading-relaxed">${pred.fantasy_tips}</p>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-3">
+                                    <div>
+                                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Goal Scorers:</span>
+                                        <div class="flex flex-wrap gap-1.5 mt-1">${renderBadges(pred.goalscorers, 'soccer')}</div>
+                                    </div>
+                                    <div>
+                                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Goal Assists:</span>
+                                        <div class="flex flex-wrap gap-1.5 mt-1">${renderBadges(pred.assists, 'assist')}</div>
+                                    </div>
+                                    <div>
+                                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Bookings:</span>
+                                        <div class="flex flex-wrap gap-1.5 mt-1">${renderBadges(pred.bookings, 'card')}</div>
+                                    </div>
+                                    <div>
+                                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Injuries:</span>
+                                        <div class="flex flex-wrap gap-1.5 mt-1">${renderBadges(pred.injuries, 'injury')}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <details class="group mt-6 border border-slate-800 rounded-xl overflow-hidden">
+                                <summary class="list-none flex justify-between items-center p-3 bg-slate-950/60 cursor-pointer text-xs font-bold text-slate-400 hover:text-white select-none">
+                                    <span>🔍 VIEW AI GROUNDED RESEARCH ANALYSIS</span>
+                                    <span class="transition group-open:rotate-180">▼</span>
+                                </summary>
+                                <div class="p-4 bg-slate-950/30 text-slate-400 text-xs leading-relaxed max-h-48 overflow-y-auto border-t border-slate-800">
+                                    ${pred.raw_analysis}
+                                </div>
+                            </details>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <div class="text-center py-6">
+                            <span class="px-2.5 py-1 rounded-md text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 uppercase tracking-wider">
+                                ⏳ Live Prediction Pipeline Triggered
+                            </span>
+                            <p class="text-slate-400 text-sm mt-4 font-semibold">${targetMatch.home_team} vs ${targetMatch.away_team}</p>
+                            <p class="text-slate-500 text-xs mt-2">Lineup sheets submitted. The AI Agent is currently compiling search results...</p>
+                        </div>
+                    `;
+                }
+            } else {
+                // Locked Window Placeholder
+                const hoursLeft = Math.floor(diffHours);
+                const minutesLeft = Math.floor((diffHours - hoursLeft) * 60);
+
+                container.innerHTML = `
+                    <div class="text-center py-8">
+                        <div class="text-3xl mb-3">🔒</div>
+                        <span class="text-slate-400 font-bold uppercase tracking-wider text-xs block">Predictions Locked</span>
+                        <p class="text-slate-500 text-xs mt-2">
+                            Next match is <strong class="text-slate-300 font-bold">${targetMatch.home_team} vs ${targetMatch.away_team}</strong>. 
+                        </p>
+                        <p class="text-indigo-400/90 text-sm font-semibold mt-3">
+                            Prediction releases in roughly ${hoursLeft}h ${minutesLeft}m.
+                        </p>
+                    </div>
+                `;
+            }
+        }
+
+        /**
+         * Handles filtering logic based on Search field and dropdown values
+         */
+        function applyFilters() {
+            const searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
+            const filterValue = document.getElementById('filter-select').value;
+
+            // Only archive matches that have a completed result loaded
+            let list = allMatches.filter(m => {
+                const resultsArray = m.results || [];
+                return resultsArray.length > 0;
+            });
+
+            // Filter 1: Name search
+            if (searchQuery !== "") {
+                list = list.filter(m => 
+                    m.home_team.toLowerCase().includes(searchQuery) || 
+                    m.away_team.toLowerCase().includes(searchQuery)
+                );
+            }
+
+            // Filter 2: AI prediction accuracy filter
+            if (filterValue !== "all") {
+                list = list.filter(m => {
+                    const predictionsArray = m.predictions || [];
+                    const resultsArray = m.results || [];
+                    if (predictionsArray.length === 0 || resultsArray.length === 0) return false;
+
+                    const predWinner = predictionsArray[0].predicted_winner.toLowerCase().trim();
+                    const realWinner = resultsArray[0].actual_winner.toLowerCase().trim();
+
+                    const isCorrect = predWinner === realWinner;
+                    return filterValue === "correct" ? isCorrect : !isCorrect;
+                });
+            }
+
+            filteredMatches = list;
+            itemsToShow = 4; // Reset lazy load tracking index
+            renderArchive();
+        }
+
+        /**
+         * Renders comparison entries with side-by-side design
+         */
+        function renderArchive() {
+            const grid = document.getElementById('archive-grid');
+            grid.innerHTML = '';
+
+            const matchesToRender = filteredMatches.slice(0, itemsToShow);
+
+            if (matchesToRender.length === 0) {
+                grid.innerHTML = `
+                    <div class="text-center py-12 bg-slate-900/30 border border-slate-800 rounded-xl">
+                        <p class="text-slate-500 text-sm">No matches found matching filter parameters.</p>
+                    </div>
+                `;
+                document.getElementById('lazy-load-container').classList.add('hidden');
+                return;
+            }
+
+            matchesToRender.forEach(match => {
+                const kickoff = new Date(match.kickoff_time);
+                const predictionsArray = match.predictions || [];
+                const resultsArray = match.results || [];
+
+                const pred = predictionsArray[0];
+                const real = resultsArray[0];
+
+                // Evaluate outcome correctness for visual badging
+                let accuracyBadge = '';
+                if (pred && real) {
+                    const isCorrect = pred.predicted_winner.toLowerCase().trim() === real.actual_winner.toLowerCase().trim();
+                    accuracyBadge = isCorrect 
+                        ? `<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-md text-[10px] font-bold">✅ Correct Winner predicted</span>`
+                        : `<span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2.5 py-1 rounded-md text-[10px] font-bold">❌ Incorrect Winner predicted</span>`;
+                }
+
+                const card = document.createElement('div');
+                card.className = "bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4";
+                card.innerHTML = `
+                    <!-- Row Meta Header -->
+                    <div class="flex justify-between items-center text-xs text-slate-500 border-b border-slate-800/80 pb-3">
+                        <span class="font-semibold text-slate-400">Match ID: ${match.id} | ${kickoff.toLocaleDateString([], {month: 'short', day: 'numeric'})}</span>
+                        ${accuracyBadge}
+                    </div>
+
+                    <!-- Comparison Side-by-Side Wrapper -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        
+                        <!-- LEFT COLUMN: AI Prediction -->
+                        <div class="bg-slate-950/40 border border-slate-800/60 p-4 rounded-xl">
+                            <h4 class="text-indigo-400 text-xs font-bold uppercase tracking-wider mb-3">🔮 AI PREDICTION</h4>
+                            
+                            <div class="grid grid-cols-2 gap-4 mb-4 text-xs">
+                                <div>
+                                    <span class="text-slate-600 font-bold block uppercase">Winner Forecast</span>
+                                    <span class="text-slate-200 font-bold">${pred ? pred.predicted_winner : "N/A"}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-600 font-bold block uppercase">Score Forecast</span>
+                                    <span class="text-slate-200 font-bold">${pred ? pred.predicted_score : "N/A"}</span>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2 mt-4">
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-600 uppercase">Expected Scorers:</span>
+                                    <div class="flex flex-wrap gap-1 mt-1">${renderBadges(pred ? pred.goalscorers : null, 'soccer')}</div>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-600 uppercase">Expected Bookings:</span>
+                                    <div class="flex flex-wrap gap-1 mt-1">${renderBadges(pred ? pred.bookings : null, 'card')}</div>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-600 uppercase">Predicted Injuries:</span>
+                                    <div class="flex flex-wrap gap-1 mt-1">${renderBadges(pred ? pred.injuries : null, 'injury')}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- RIGHT COLUMN: Actual Result (Ground Truth) -->
+                        <div class="bg-slate-950/40 border border-slate-800/60 p-4 rounded-xl">
+                            <h4 class="text-amber-500 text-xs font-bold uppercase tracking-wider mb-3">🎯 ACTUAL MATCH OUTCOME</h4>
+                            
+                            <div class="grid grid-cols-2 gap-4 mb-4 text-xs">
+                                <div>
+                                    <span class="text-slate-600 font-bold block uppercase">Official Winner</span>
+                                    <span class="text-slate-200 font-bold">${real ? real.actual_winner : "Pending Verification"}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-600 font-bold block uppercase">Official Score</span>
+                                    <span class="text-slate-200 font-bold">${real ? real.actual_score : "Pending"}</span>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2 mt-4">
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-600 uppercase">Real Scorers:</span>
+                                    <div class="flex flex-wrap gap-1 mt-1">${renderBadges(real ? real.goalscorers : null, 'soccer')}</div>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-600 uppercase">Real Bookings:</span>
+                                    <div class="flex flex-wrap gap-1 mt-1">${renderBadges(real ? real.bookings : null, 'card')}</div>
+                                </div>
+                                <div>
+                                    <span class="text-[10px] font-bold text-slate-600 uppercase">Real Injuries:</span>
+                                    <div class="flex flex-wrap gap-1 mt-1">${renderBadges(real ? real.injuries : null, 'injury')}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            // Manage Lazy loading button display limits
+            const loadMoreBtn = document.getElementById('load-more-btn');
+            if (filteredMatches.length > itemsToShow) {
+                document.getElementById('lazy-load-container').classList.remove('hidden');
+                loadMoreBtn.classList.remove('hidden');
+            } else {
+                loadMoreBtn.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Helper: converts list items to HTML metadata badges
+         */
+        function renderBadges(arr, type) {
+            if (!arr || !Array.isArray(arr) || arr.length === 0) {
+                return `<span class="text-slate-700 text-[10px]">None recorded</span>`;
+            }
+
+            return arr.map(item => {
+                let text = item.player || "N/A";
+                if (item.minute) text += ` (${item.minute}')`;
+                if (item.type) text += ` [${item.type}]`;
+
+                let colors = "bg-slate-900/80 text-slate-400";
+                if (type === 'soccer') colors = "bg-emerald-500/10 text-emerald-300 border border-emerald-500/20";
+                if (type === 'assist') colors = "bg-blue-500/10 text-blue-300 border border-blue-500/20";
+                if (type === 'card') colors = "bg-amber-500/10 text-amber-300 border border-amber-500/20";
+                if (type === 'injury') colors = "bg-rose-500/10 text-rose-300 border border-rose-500/20";
+
+                return `<span class="px-2 py-0.5 rounded text-[10px] font-medium ${colors}">${text}</span>`;
+            }).join('');
+        }
+
+        // Trigger Filters on select changes
+        document.getElementById('search-input').addEventListener('input', applyFilters);
+        document.getElementById('filter-select').addEventListener('change', applyFilters);
+
+        // Handle Lazy Load click updates
+        document.getElementById('load-more-btn').addEventListener('click', () => {
+            itemsToShow += 4; // Add 4 more items to the view stack
+            renderArchive();
+        });
+
+        // Initialize script logic
+        loadDashboardData();
+    </script>
+</body>
+</html>
