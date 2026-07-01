@@ -8,7 +8,10 @@
 "23","Mexico","Ecuador","2026-07-01T01:00:00+00:00","Completed","","","","","","","","","","","","","Pending Prediction",""
 "24","England","DR Congo","2026-07-01T16:00:00+00:00","Pending","","","","","","","","","","","","","Pending Prediction",""
 "25","Belgium","Senegal","2026-07-01T20:00:00+00:00","Completed","","","","","","","","","","","","","Pending Prediction",""
-"26","United States","Bosnia and Herzegovina","2026-07-02T00:00:00+00:00","Pending","","","","","","","","","","","","","Pending Prediction",""
+"26","United States","Bosnia and Herzegovina","2026-07-02T00:00:00+00:00","Error: Gemini API Error (HTTP 503): {
+  ""error"": {
+    ""code"": 503,
+    ""message"": ""This model is currently","","","","","","","","","","","","","Pending Prediction",""
 "27","Spain","Austria","2026-07-02T19:00:00+00:00","Pending","","","","","","","","","","","","","Pending Prediction",""
 "28","Portugal","Croatia","2026-07-02T23:00:00+00:00","Pending","","","","","","","","","","","","","Pending Prediction",""
 "29","Switzerland","Algeria","2026-07-03T03:00:00+00:00","Pending","","","","","","","","","","","","","Pending Prediction",""
