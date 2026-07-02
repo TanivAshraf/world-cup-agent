@@ -1,8 +1,9 @@
 /**
- * File 1: predict.js (Google Search API Updated Version)
+ * File 1: predict.js (Robust Recovery & JSON Extraction Version)
  * 
- * This version replaces the deprecated 'google_search_retrieval' tool
- * with the updated 'google_search' tool specification to resolve HTTP 400 blocks.
+ * Includes:
+ * 1. Catch-Up Recovery Window (recovers predictions if cron is delayed past kickoff).
+ * 2. Regular Expression JSON Extractor (strips surrounding dialogue, trailing commas, and smart quotes).
  */
 
 const { createClient } = require('@supabase/supabase-js');
@@ -18,6 +19,37 @@ if (!supabaseUrl || !supabaseServiceRoleKey || !geminiApiKey) {
 
 const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 const MODEL_NAME = "gemini-2.5-flash"; 
+
+/**
+ * Robust JSON Extractor & Sanitizer
+ * Solves "Failed to auto-parse" errors by extracting JSON blocks from surrounding text
+ * and cleaning common syntax anomalies like trailing commas or smart quotes.
+ */
+function cleanAndParseJSON(rawText) {
+  let cleanText = rawText.trim();
+  
+  // 1. Try to extract content inside markdown backticks
+  const markdownRegex = /```(?:json)?\s*([\s\S]*?)\s*```/i;
+  const match = cleanText.match(markdownRegex);
+  if (match && match[1]) {
+    cleanText = match[1].trim();
+  } else {
+    // 2. Fallback: Find the first '{' or '[' and the last '}' or ']'
+    const firstBrace = cleanText.search(/[{[]/);
+    const lastBrace = Math.max(cleanText.lastIndexOf('}'), cleanText.lastIndexOf(']'));
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+      cleanText = cleanText.substring(firstBrace, lastBrace + 1).trim();
+    }
+  }
+  
+  // 3. Clean up syntax errors (trailing commas, smart quotes)
+  cleanText = cleanText
+    .replace(/,\s*([\]}])/g, '$1') // Removes trailing commas
+    .replace(/[\u201C\u201D]/g, '"') // Replaces smart double quotes
+    .replace(/[\u2018\u2019]/g, "'"); // Replaces smart single quotes
+    
+  return JSON.parse(cleanText);
+}
 
 async function startPredictionWorkflow() {
   console.log("🚀 Starting Prediction Engine...");
@@ -55,12 +87,13 @@ async function startPredictionWorkflow() {
       console.log(`🔍 Checking Match ID ${match.id}: ${match.home_team} vs ${match.away_team}`);
       console.log(`   Kickoff Time: ${kickoffTime.toISOString()} (In ${diffHours.toFixed(2)} hours)`);
 
-      // Window check: Starts predictions strictly between T-2.5 hours and kickoff
-      if (diffHours > 0 && diffHours <= 2.5) {
-        console.log(`🎯 Match falls in active window! Running prediction pipeline...`);
+      // WINDOW UPGRADE: qualified if kickoff is <= 2.5 hours away, including a 3-hour recovery 
+      // window after kickoff has passed to catch up on missed scheduler runs.
+      if (diffHours <= 2.5 && diffHours > -3) {
+        console.log(`🎯 Match qualifies for prediction! Running pipeline...`);
         await runPredictionForMatch(match);
       } else {
-        console.log("⏭️ Match skipped (not inside the 0 to 2.5 hours window).");
+        console.log("⏭️ Match skipped (not inside the pre-kickoff or catch-up recovery window).");
       }
     }
 
@@ -119,7 +152,7 @@ async function syncUpcomingFixtures() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: syncPrompt }] }],
-        tools: [{ google_search: {} }], // Updated to matching 2026 api toolspec
+        tools: [{ google_search: {} }], 
         generationConfig: { temperature: 0.1 }
       })
     });
@@ -132,16 +165,9 @@ async function syncUpcomingFixtures() {
     }
 
     const jsonResponse = JSON.parse(rawText);
-    let generatedText = jsonResponse.candidates[0].content.parts[0].text.trim();
+    const generatedText = jsonResponse.candidates[0].content.parts[0].text.trim();
 
-    if (generatedText.startsWith("```")) {
-      const matchRegex = generatedText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-      if (matchRegex && matchRegex[1]) {
-        generatedText = matchRegex[1].trim();
-      }
-    }
-
-    const newMatches = JSON.parse(generatedText);
+    const newMatches = cleanAndParseJSON(generatedText);
 
     if (newMatches && Array.isArray(newMatches) && newMatches.length > 0) {
       console.log(`✨ Found ${newMatches.length} new confirmed matches. Saving to database...`);
@@ -234,7 +260,7 @@ async function syncCompletedResults() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             contents: [{ parts: [{ text: resultPrompt }] }],
-            tools: [{ google_search: {} }], // Updated to matching 2026 api toolspec
+            tools: [{ google_search: {} }], 
             generationConfig: { temperature: 0.1 }
           })
         });
@@ -243,16 +269,9 @@ async function syncCompletedResults() {
         if (apiResponse.status !== 200) throw new Error(`Results API failed: ${rawText}`);
 
         const jsonResponse = JSON.parse(rawText);
-        let generatedText = jsonResponse.candidates[0].content.parts[0].text.trim();
+        const generatedText = jsonResponse.candidates[0].content.parts[0].text.trim();
 
-        if (generatedText.startsWith("```")) {
-          const matchRegex = generatedText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-          if (matchRegex && matchRegex[1]) {
-            generatedText = matchRegex[1].trim();
-          }
-        }
-
-        const parsedResult = JSON.parse(generatedText);
+        const parsedResult = cleanAndParseJSON(generatedText);
 
         const { error: insertError } = await supabase
           .from('results')
@@ -321,7 +340,7 @@ async function runPredictionForMatch(match) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: targetPrompt }] }],
-        tools: [{ google_search: {} }], // Updated to matching 2026 api toolspec
+        tools: [{ google_search: {} }], 
         generationConfig: { temperature: 0.15 }
       })
     });
@@ -339,17 +358,9 @@ async function runPredictionForMatch(match) {
 
     console.log("⚡ Prediction received. Cleaning response contents...");
 
-    let cleanText = generatedText.trim();
-    if (cleanText.startsWith("```")) {
-      const matchRegex = cleanText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-      if (matchRegex && matchRegex[1]) {
-        cleanText = matchRegex[1].trim();
-      }
-    }
-
     let parsed;
     try {
-      parsed = JSON.parse(cleanText);
+      parsed = cleanAndParseJSON(generatedText);
     } catch (parseError) {
       console.warn("⚠️ JSON format parsing failed. Storing raw output.", parseError);
       parsed = {
