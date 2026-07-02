@@ -4,58 +4,56 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Taniv-Gemini World Cup Predictor</title>
-    <!-- Tailwind CSS CDN for high-fidelity dashboard layout -->
+    <!-- Tailwind CSS CDN for high-fidelity interface -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
         
         body {
             font-family: 'Inter', sans-serif;
+            background-color: #080c14;
         }
         .font-mono {
             font-family: 'JetBrains Mono', monospace;
         }
-        .sports-dark-bg {
-            background-color: #0b0f19;
-        }
         .panel-surface {
-            background-color: #111827;
-            border: 1px solid #1f2937;
+            background-color: #0f1422;
+            border: 1px solid #1e293b;
         }
-        .comparison-divider {
-            background-image: linear-gradient(to bottom, #1f2937 40%, rgba(255,255,255,0) 0%);
-            background-position: right;
-            background-size: 1px 10px;
-            background-repeat: repeat-y;
+        /* Mobile Segment Toggle Styling */
+        .toggle-btn-active {
+            background-color: #1e293b;
+            color: #ffffff;
+            font-weight: 600;
         }
     </style>
 </head>
-<body class="sports-dark-bg text-slate-100 min-h-screen">
+<body class="text-slate-100 min-h-screen">
 
     <!-- Top Navigation / Research Header -->
-    <header class="border-b border-slate-800 bg-[#0d121f] px-6 py-6">
+    <header class="border-b border-slate-800 bg-[#0b0e1a] px-6 py-5">
         <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="text-center md:text-left">
-                <span class="text-[10px] font-bold tracking-widest text-indigo-400 uppercase bg-indigo-500/10 px-2.5 py-1 rounded border border-indigo-500/20">
+                <span class="text-[9px] font-bold tracking-widest text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded border border-indigo-500/20 uppercase">
                     Prospective Study: WC 2026
                 </span>
                 <h1 class="text-2xl font-extrabold text-white tracking-tight mt-2 font-mono">
                     Taniv-Gemini World Cup Predictor
                 </h1>
                 <p class="text-slate-400 text-xs mt-1">
-                    Grounded predictive tracking modeled 2.0 hours prior to official FIFA kickoff.
+                    Decoupled sports-predictive model executing 2 hours prior to kickoff.
                 </p>
             </div>
             
-            <!-- Global Research Meta Stats -->
-            <div class="flex items-center gap-4 text-xs">
-                <div class="bg-[#111827] border border-slate-850 px-4 py-2 rounded-lg">
-                    <span class="text-slate-500 block uppercase font-bold text-[9px] tracking-wider">Monitored</span>
-                    <span id="total-matches" class="text-slate-200 font-bold font-mono">--</span>
+            <!-- Global Dashboard Meta Metrics -->
+            <div class="flex items-center gap-4 text-xs font-mono">
+                <div class="bg-[#0f1422] border border-slate-800 px-4 py-2 rounded-lg">
+                    <span class="text-slate-500 block uppercase font-bold text-[8px] tracking-wider">Monitored</span>
+                    <span id="total-matches" class="text-slate-200 font-bold">--</span>
                 </div>
-                <div class="bg-[#111827] border border-slate-850 px-4 py-2 rounded-lg">
-                    <span class="text-slate-500 block uppercase font-bold text-[9px] tracking-wider">Predictions</span>
-                    <span id="total-predictions" class="text-emerald-400 font-bold font-mono">--</span>
+                <div class="bg-[#0f1422] border border-slate-800 px-4 py-2 rounded-lg">
+                    <span class="text-slate-500 block uppercase font-bold text-[8px] tracking-wider">Predictions</span>
+                    <span id="total-predictions" class="text-emerald-400 font-bold">--</span>
                 </div>
             </div>
         </div>
@@ -70,7 +68,7 @@
         <section aria-labelledby="live-window-heading">
             <h2 id="live-window-heading" class="text-xs font-bold tracking-widest text-slate-400 uppercase mb-4 flex items-center gap-2">
                 <span class="h-2 w-2 rounded-full bg-indigo-500 animate-pulse"></span>
-                Real-Time Predictive Window
+                Real-Time Predictive Window (T-2.5H)
             </h2>
             <div id="live-window-container" class="panel-surface p-6 rounded-xl shadow-lg">
                 <p class="text-center text-slate-500 py-6 text-xs animate-pulse">Scanning live schedule from database...</p>
@@ -78,44 +76,44 @@
         </section>
 
         <!-- ========================================== -->
-        <!-- SECTION 2: THE SCIENTIFIC COMPARISON SHEETS -->
+        <!-- SECTION 2: THE INTERACTIVE ARCHIVE SHEETS   -->
         <!-- ========================================== -->
         <section aria-labelledby="archive-heading">
             <div class="border-b border-slate-800 pb-4 mb-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
                 <div>
                     <h2 id="archive-heading" class="text-lg font-bold text-white font-mono">Verification Sheets</h2>
-                    <p class="text-xs text-slate-400 mt-1">Grounded predictions compared side-by-side with official post-match results.</p>
+                    <p class="text-xs text-slate-400 mt-1">Grounded predictions compared side-by-side with outcomes (Latest matches on top).</p>
                 </div>
                 
-                <!-- Controls Dashboard -->
+                <!-- Filters panel -->
                 <div class="flex flex-wrap gap-2 w-full md:w-auto">
                     <input 
                         type="text" 
                         id="search-input" 
-                        placeholder="Filter by team..." 
-                        class="bg-[#111827] border border-slate-800 px-3 py-1.5 rounded text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 w-full md:w-44 font-mono"
+                        placeholder="Search team..." 
+                        class="bg-[#0f1422] border border-slate-800 px-3 py-1.5 rounded text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 w-full md:w-44 font-mono"
                     />
                     <select 
                         id="filter-select" 
-                        class="bg-[#111827] border border-slate-800 px-3 py-1.5 rounded text-xs text-slate-300 focus:outline-none focus:border-indigo-500 cursor-pointer font-mono w-full md:w-auto"
+                        class="bg-[#0f1422] border border-slate-800 px-3 py-1.5 rounded text-xs text-slate-300 focus:outline-none focus:border-indigo-500 cursor-pointer font-mono w-full md:w-auto"
                     >
                         <option value="all">All Matches</option>
                         <option value="correct">Accuracy: Correct Winner</option>
-                        <option value="incorrect">Accuracy: Incorrect Winner</option>
+                        <option value="incorrect">Accuracy: Forecast Error</option>
                     </select>
                 </div>
             </div>
 
             <!-- Comparison Sheets Stack -->
             <div id="archive-grid" class="space-y-6">
-                <!-- Javascript populated -->
+                <!-- Data populated dynamically -->
             </div>
 
             <!-- Pagination Control -->
             <div class="text-center mt-8" id="lazy-load-container">
                 <button 
                     id="load-more-btn" 
-                    class="hidden bg-[#111827] hover:bg-[#182235] border border-slate-800 text-slate-300 px-5 py-2 rounded text-xs font-semibold tracking-wider transition-colors focus:outline-none font-mono"
+                    class="hidden bg-[#0f1422] hover:bg-slate-800 border border-slate-800 text-slate-300 px-5 py-2 rounded text-xs font-semibold tracking-wider transition-colors focus:outline-none font-mono"
                 >
                     Load Older Fixtures
                 </button>
@@ -128,10 +126,10 @@
     <script>
         let allMatches = [];
         let filteredMatches = [];
-        let itemsToShow = 4; // Staging pagination limit
+        let itemsToShow = 4; // Initial loading pagination limit
 
         /**
-         * Robust parser to extract data objects nested as arrays or single structures
+         * Parses child array relationships return types safely
          */
         function extractRelation(data) {
             if (!data) return null;
@@ -142,15 +140,15 @@
         }
 
         /**
-         * Securely loads matches payload via local Vercel gateway proxy
+         * Pulls data securely from Vercel Serverless Function Proxy.
          */
         async function loadDashboardData() {
             try {
-                // Fetch bypassing proxy caches to always secure immediate Supabase updates
+                // Fetch fresh database states from Vercel Serverless API
                 const response = await fetch(`/api/data?t=${Date.now()}`);
                 
                 if (!response.ok) {
-                    throw new Error(`API Connection Failed: HTTP ${response.status}`);
+                    throw new Error(`API Gateway Connection Failed: HTTP ${response.status}`);
                 }
 
                 allMatches = await response.json();
@@ -171,7 +169,7 @@
         }
 
         /**
-         * Manages active pre-match prediction window. Unlocks exactly at T-2.5h
+         * Evaluates and updates the pre-match monitor window
          */
         function renderLivePredictiveWindow() {
             const container = document.getElementById('live-window-container');
@@ -189,7 +187,7 @@
             if (upcoming.length === 0) {
                 container.innerHTML = `
                     <p class="text-center text-slate-500 py-6 text-xs font-mono">
-                        STATUS: ACTIVE MONITOR OFFLINE (NO PENDING MATCHES IN THE 2.5-HOUR WINDOW)
+                        STATUS: ACTIVE MONITOR OFFLINE (NO MATCHES IN THE 2.5-HOUR WINDOW)
                     </p>
                 `;
                 return;
@@ -200,16 +198,14 @@
             const diffHours = (kickoff.getTime() - now.getTime()) / (1000 * 60 * 60);
             const pred = extractRelation(targetMatch.predictions);
 
-            // T-2.5 hours checks
             if (diffHours <= 2.5 && diffHours > -3) {
                 if (pred) {
                     container.innerHTML = `
                         <div class="space-y-6">
-                            <!-- Real-time Unlocked Header -->
                             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-800 pb-4">
                                 <div class="space-y-1">
-                                    <span class="text-[9px] font-bold tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded uppercase">
-                                        Active Forecast Unlocked
+                                    <span class="text-[9px] font-bold tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded uppercase font-mono">
+                                        🔓 Live Prediction Unlocked
                                     </span>
                                     <h3 class="text-slate-400 text-xs font-mono mt-1">Kickoff: ${kickoff.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} UTC</h3>
                                 </div>
@@ -219,50 +215,48 @@
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <!-- AI Forecast Data Sheet -->
                                 <div class="space-y-4">
-                                    <div class="grid grid-cols-2 gap-4">
+                                    <div class="grid grid-cols-2 gap-4 font-mono">
                                         <div class="bg-slate-950 p-3.5 rounded border border-slate-850">
                                             <span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider block">Winner Forecast</span>
-                                            <span class="text-slate-200 font-bold text-sm block mt-1 font-mono">${pred.predicted_winner}</span>
+                                            <span class="text-slate-200 font-bold text-sm block mt-1">${pred.predicted_winner}</span>
                                         </div>
                                         <div class="bg-slate-950 p-3.5 rounded border border-slate-850">
                                             <span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider block">Scoreline Forecast</span>
-                                            <span class="text-slate-200 font-bold text-sm block mt-1 font-mono">${pred.predicted_score}</span>
+                                            <span class="text-slate-200 font-bold text-sm block mt-1">${pred.predicted_score}</span>
                                         </div>
                                     </div>
                                     <div class="bg-slate-950 p-4 rounded border border-slate-850 text-xs">
-                                        <span class="text-[9px] font-bold text-indigo-400 uppercase tracking-wider block mb-2">🛡️ FIFA Fantasy Recommendations</span>
+                                        <span class="text-[9px] font-bold text-indigo-400 uppercase tracking-wider block mb-2 font-mono">🛡️ FIFA Fantasy Recommendations</span>
                                         <p class="text-slate-300 leading-relaxed">${pred.fantasy_tips}</p>
                                     </div>
                                 </div>
 
-                                <!-- Real-time Event Metrics table -->
                                 <div class="bg-slate-950/40 p-4 rounded border border-slate-850 space-y-3">
-                                    <h4 class="text-slate-400 text-[10px] font-bold uppercase tracking-wider border-b border-slate-850 pb-2">Predicted Event Log</h4>
+                                    <h4 class="text-slate-400 text-[10px] font-bold uppercase tracking-wider border-b border-slate-850 pb-2 font-mono">Event Estimations Table</h4>
                                     <div class="grid grid-cols-3 gap-2 py-1 text-xs">
-                                        <span class="text-slate-500 font-medium">Scorers</span>
+                                        <span class="text-slate-500 font-medium font-mono">Scorers</span>
                                         <div class="col-span-2 flex flex-wrap gap-1">${renderBadges(pred.goalscorers, 'soccer')}</div>
                                     </div>
                                     <div class="grid grid-cols-3 gap-2 py-1 text-xs">
-                                        <span class="text-slate-500 font-medium">Assists</span>
+                                        <span class="text-slate-500 font-medium font-mono">Assists</span>
                                         <div class="col-span-2 flex flex-wrap gap-1">${renderBadges(pred.assists, 'assist')}</div>
                                     </div>
                                     <div class="grid grid-cols-3 gap-2 py-1 text-xs">
-                                        <span class="text-slate-500 font-medium">Cards</span>
+                                        <span class="text-slate-500 font-medium font-mono">Cards</span>
                                         <div class="col-span-2 flex flex-wrap gap-1">${renderBadges(pred.bookings, 'card')}</div>
                                     </div>
                                     <div class="grid grid-cols-3 gap-2 py-1 text-xs">
-                                        <span class="text-slate-500 font-medium">Injury Risk</span>
+                                        <span class="text-slate-500 font-medium font-mono">Injuries</span>
                                         <div class="col-span-2 flex flex-wrap gap-1">${renderBadges(pred.injuries, 'injury')}</div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Tactical Briefing Breakdown -->
+                            <!-- Interactive Segmented Narrative Tabs -->
                             <div class="border border-slate-850 rounded bg-slate-950/20 overflow-hidden">
-                                <div class="bg-slate-950 px-4 py-2 border-b border-slate-850 text-[10px] font-bold tracking-wider text-slate-400 font-mono">
-                                    🔬 TACTICAL BRIEFING & MATCH NARRATIVE
+                                <div class="bg-slate-950 px-4 py-2 border-b border-slate-850 text-[10px] font-bold tracking-wider text-slate-400 font-mono uppercase">
+                                    📝 Grounded Tactical Analysis
                                 </div>
                                 <div class="p-4 text-slate-300 text-xs leading-relaxed space-y-4">
                                     <p class="whitespace-pre-line">${pred.raw_analysis}</p>
@@ -278,12 +272,11 @@
                                 ⏳ Real-Time Extraction Triggered
                             </span>
                             <p class="text-slate-400 text-sm mt-4 font-semibold font-mono">${targetMatch.home_team} vs ${targetMatch.away_team}</p>
-                            <p class="text-slate-500 text-xs mt-1">Official lineup sheets received. The AI Agent is compiling search queries...</p>
+                            <p class="text-slate-500 text-xs mt-1 font-mono">Official lineups received. The AI Agent is compiling search results...</p>
                         </div>
                     `;
                 }
             } else {
-                // Countdown states
                 const hoursLeft = Math.floor(diffHours);
                 const minutesLeft = Math.floor((diffHours - hoursLeft) * 60);
 
@@ -302,7 +295,7 @@
         }
 
         /**
-         * Coordinates live filter adjustments
+         * Processes data filters and handles reverse chronological sorting (newest on top)
          */
         function applyFilters() {
             const searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
@@ -314,6 +307,9 @@
                 return real !== null;
             });
 
+            // CRITICAL UPGRADE: Sort matches reverse-chronologically so the latest results sit at the top
+            list.sort((a, b) => new Date(b.kickoff_time) - new Date(a.kickoff_time));
+
             // Name Search Filter
             if (searchQuery !== "") {
                 list = list.filter(m => 
@@ -322,7 +318,7 @@
                 );
             }
 
-            // Accuracy Score Filter
+            // Accuracy Filter
             if (filterValue !== "all") {
                 list = list.filter(m => {
                     const pred = extractRelation(m.predictions);
@@ -342,7 +338,7 @@
         }
 
         /**
-         * Renders comparison sheets stack
+         * Renders comparison entries with mobile-first sliding tabs to prevent vertical squishing
          */
         function renderArchive() {
             const grid = document.getElementById('archive-grid');
@@ -365,84 +361,97 @@
                 const pred = extractRelation(match.predictions);
                 const real = extractRelation(match.results);
 
-                // Audit Status Badges
+                // Audit Accuracy evaluation
                 let accuracyBadge = '';
                 if (pred && real) {
                     const isCorrect = pred.predicted_winner.toLowerCase().trim() === real.actual_winner.toLowerCase().trim();
                     accuracyBadge = isCorrect 
-                        ? `<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded text-[10px] font-bold font-mono">STATUS: CONFIRMED ACCURATE</span>`
-                        : `<span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded text-[10px] font-bold font-mono">STATUS: FORECAST ERROR</span>`;
+                        ? `<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded text-[10px] font-bold font-mono">ACCURACY: SUCCESS</span>`
+                        : `<span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2.5 py-0.5 rounded text-[10px] font-bold font-mono">ACCURACY: MISSED</span>`;
                 }
 
                 const card = document.createElement('div');
-                card.className = "panel-surface p-6 rounded-xl shadow-lg space-y-4";
+                card.className = "panel-surface p-5 rounded-xl shadow-lg space-y-4";
+                
+                // We construct a fully responsive layout: 
+                // On mobile, they switch between "Forecast" and "Actual" via neat segment buttons.
+                // On desktop, they display side-by-side gracefully.
                 card.innerHTML = `
-                    <!-- Row Meta Header -->
                     <div class="flex justify-between items-center text-xs text-slate-500 border-b border-slate-800 pb-3 font-mono">
                         <span class="font-semibold">Match ID: ${match.id} | ${kickoff.toLocaleDateString([], {month: 'short', day: 'numeric'})}</span>
                         ${accuracyBadge}
                     </div>
 
-                    <!-- Comparison Grid Sheets -->
+                    <!-- Mobile Segmented Controller -->
+                    <div class="flex md:hidden bg-slate-950 p-1 rounded-lg border border-slate-800 font-mono text-[10px] tracking-wider mb-2">
+                        <button onclick="switchTab(${match.id}, 'forecast')" id="tab-btn-forecast-${match.id}" class="w-1/2 py-1.5 rounded text-center toggle-btn-active transition-all focus:outline-none">
+                            🔮 AI FORECAST
+                        </button>
+                        <button onclick="switchTab(${match.id}, 'outcome')" id="tab-btn-outcome-${match.id}" class="w-1/2 py-1.5 rounded text-center text-slate-500 transition-all focus:outline-none">
+                            🎯 MATCH OUTCOME
+                        </button>
+                    </div>
+
+                    <!-- Layout wrapper -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-0 border border-slate-800 rounded-lg overflow-hidden">
                         
-                        <!-- FORECAST CONTAINER -->
-                        <div class="comparison-divider p-5 bg-slate-950/20">
-                            <h4 class="text-indigo-400 text-[10px] font-bold uppercase tracking-wider mb-4 font-mono">📊 AI ESTIMATION (T-2H)</h4>
+                        <!-- COLUMN 1: FORECAST SHEET -->
+                        <div id="panel-forecast-${match.id}" class="p-5 bg-slate-950/20 md:border-r md:border-slate-800">
+                            <h4 class="hidden md:block text-indigo-400 text-[10px] font-bold uppercase tracking-wider mb-4 font-mono">🔮 AI FORECAST (T-2H)</h4>
                             
                             <div class="grid grid-cols-2 gap-4 mb-4 text-xs font-mono">
                                 <div>
-                                    <span class="text-slate-600 font-bold block text-[9px] uppercase">Winner Forecast</span>
-                                    <span class="text-slate-200 font-bold text-sm block mt-1">${pred ? pred.predicted_winner : "N/A"}</span>
+                                    <span class="text-slate-600 font-bold block text-[9px] uppercase">Winner Prediction</span>
+                                    <span class="text-slate-200 font-bold block mt-1">${pred ? pred.predicted_winner : "N/A"}</span>
                                 </div>
                                 <div>
-                                    <span class="text-slate-600 font-bold block text-[9px] uppercase">Scoreline Forecast</span>
-                                    <span class="text-slate-200 font-bold text-sm block mt-1">${pred ? pred.predicted_score : "N/A"}</span>
+                                    <span class="text-slate-600 font-bold block text-[9px] uppercase">Scoreline Prediction</span>
+                                    <span class="text-slate-200 font-bold block mt-1">${pred ? pred.predicted_score : "N/A"}</span>
                                 </div>
                             </div>
 
                             <div class="space-y-2 mt-4 text-xs border-t border-slate-850/80 pt-4">
                                 <div class="flex justify-between py-0.5">
-                                    <span class="text-slate-500 font-medium">Scorers</span>
-                                    <div class="flex flex-wrap gap-1 max-w-[70%] justify-end">${renderBadges(pred ? pred.goalscorers : null, 'soccer')}</div>
+                                    <span class="text-slate-500 font-medium">Goalscorers</span>
+                                    <div class="flex flex-wrap gap-1 max-w-[70%] justify-end">${renderAuditBadges(pred ? pred.goalscorers : null, real ? real.goalscorers : null, 'soccer')}</div>
                                 </div>
                                 <div class="flex justify-between py-0.5">
                                     <span class="text-slate-500 font-medium">Bookings</span>
-                                    <div class="flex flex-wrap gap-1 max-w-[70%] justify-end">${renderBadges(pred ? pred.bookings : null, 'card')}</div>
+                                    <div class="flex flex-wrap gap-1 max-w-[70%] justify-end">${renderAuditBadges(pred ? pred.bookings : null, real ? real.bookings : null, 'card')}</div>
                                 </div>
                                 <div class="flex justify-between py-0.5">
                                     <span class="text-slate-500 font-medium">Injuries</span>
-                                    <div class="flex flex-wrap gap-1 max-w-[70%] justify-end">${renderBadges(pred ? pred.injuries : null, 'injury')}</div>
+                                    <div class="flex flex-wrap gap-1 max-w-[70%] justify-end">${renderAuditBadges(pred ? pred.injuries : null, real ? real.injuries : null, 'injury')}</div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- GROUND TRUTH CONTAINER -->
-                        <div class="p-5 bg-slate-950/40">
-                            <h4 class="text-amber-500 text-[10px] font-bold uppercase tracking-wider mb-4 font-mono">🎯 OFFICIAL OUTCOME</h4>
+                        <!-- COLUMN 2: OUTCOME SHEET -->
+                        <div id="panel-outcome-${match.id}" class="hidden md:block p-5 bg-slate-950/40">
+                            <h4 class="hidden md:block text-amber-500 text-[10px] font-bold uppercase tracking-wider mb-4 font-mono">🎯 CONFIRMED OUTCOME</h4>
                             
                             <div class="grid grid-cols-2 gap-4 mb-4 text-xs font-mono">
                                 <div>
-                                    <span class="text-slate-600 font-bold block text-[9px] uppercase">Confirmed Winner</span>
-                                    <span class="text-slate-200 font-bold text-sm block mt-1">${real ? real.actual_winner : "Pending Verification"}</span>
+                                    <span class="text-slate-600 font-bold block text-[9px] uppercase">Official Winner</span>
+                                    <span class="text-slate-200 font-bold block mt-1">${real ? real.actual_winner : "Pending Verification"}</span>
                                 </div>
                                 <div>
                                     <span class="text-slate-600 font-bold block text-[9px] uppercase">Official Score</span>
-                                    <span class="text-slate-200 font-bold text-sm block mt-1">${real ? real.actual_score : "Pending"}</span>
+                                    <span class="text-slate-200 font-bold block mt-1">${real ? real.actual_score : "Pending"}</span>
                                 </div>
                             </div>
 
                             <div class="space-y-2 mt-4 text-xs border-t border-slate-850/80 pt-4">
                                 <div class="flex justify-between py-0.5">
-                                    <span class="text-slate-500 font-medium">Real Scorers</span>
+                                    <span class="text-slate-500 font-medium">Goalscorers</span>
                                     <div class="flex flex-wrap gap-1 max-w-[70%] justify-end">${renderBadges(real ? real.goalscorers : null, 'soccer')}</div>
                                 </div>
                                 <div class="flex justify-between py-0.5">
-                                    <span class="text-slate-500 font-medium">Real Bookings</span>
+                                    <span class="text-slate-500 font-medium">Bookings</span>
                                     <div class="flex flex-wrap gap-1 max-w-[70%] justify-end">${renderBadges(real ? real.bookings : null, 'card')}</div>
                                 </div>
                                 <div class="flex justify-between py-0.5">
-                                    <span class="text-slate-500 font-medium">Real Injuries</span>
+                                    <span class="text-slate-500 font-medium">Injuries</span>
                                     <div class="flex flex-wrap gap-1 max-w-[70%] justify-end">${renderBadges(real ? real.injuries : null, 'injury')}</div>
                                 </div>
                             </div>
@@ -470,7 +479,7 @@
                 grid.appendChild(card);
             });
 
-            // Lazy Loader triggers
+            // Lazy Loader limits
             const loadMoreBtn = document.getElementById('load-more-btn');
             if (filteredMatches.length > itemsToShow) {
                 document.getElementById('lazy-load-container').classList.remove('hidden');
@@ -481,7 +490,60 @@
         }
 
         /**
-         * Helper: converts list items to HTML metadata badges
+         * Mobile Segment switcher helper
+         */
+        window.switchTab = function(matchId, activeTab) {
+            const forecastBtn = document.getElementById(`tab-btn-forecast-${matchId}`);
+            const outcomeBtn = document.getElementById(`tab-btn-outcome-${matchId}`);
+            const forecastPanel = document.getElementById(`panel-forecast-${matchId}`);
+            const outcomePanel = document.getElementById(`panel-outcome-${matchId}`);
+
+            if (activeTab === 'forecast') {
+                forecastBtn.className = "w-1/2 py-1.5 rounded text-center toggle-btn-active transition-all focus:outline-none";
+                outcomeBtn.className = "w-1/2 py-1.5 rounded text-center text-slate-500 transition-all focus:outline-none";
+                forecastPanel.classList.remove('hidden');
+                outcomePanel.classList.add('hidden');
+            } else {
+                outcomeBtn.className = "w-1/2 py-1.5 rounded text-center toggle-btn-active transition-all focus:outline-none";
+                forecastBtn.className = "w-1/2 py-1.5 rounded text-center text-slate-500 transition-all focus:outline-none";
+                outcomePanel.classList.remove('hidden');
+                forecastPanel.classList.add('hidden');
+            }
+        }
+
+        /**
+         * CRITICAL UX UPGRADE: Compares predictions against outcomes in real-time.
+         * Appends (✔) in green if predicted player matches the real results sheet, 
+         * or (✘) in a muted color if it missed!
+         */
+        function renderAuditBadges(predArray, actualArray, type) {
+            if (!predArray || !Array.isArray(predArray) || predArray.length === 0) {
+                return `<span class="text-slate-700 text-[10px]">None</span>`;
+            }
+
+            return predArray.map(item => {
+                let text = item.player || "N/A";
+                if (item.minute) text += ` (${item.minute}')`;
+                if (item.type) text += ` [${item.type}]`;
+
+                // Perform fuzzy matching check inside the actual results list
+                const isMatched = actualArray && Array.isArray(actualArray) && actualArray.some(act => {
+                    const actualName = (act.player || "").toLowerCase();
+                    const predictedName = (item.player || "").toLowerCase();
+                    return actualName.includes(predictedName) || predictedName.includes(actualName);
+                });
+
+                let auditMarker = isMatched ? ' ✔' : ' ✘';
+                let colors = isMatched 
+                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/35" 
+                    : "bg-slate-900 text-slate-500 border border-slate-850";
+
+                return `<span class="px-2 py-0.5 rounded text-[10px] font-semibold font-mono ${colors}">${text}${auditMarker}</span>`;
+            }).join('');
+        }
+
+        /**
+         * Standard outcomes badges (flat list with no comparison tags)
          */
         function renderBadges(arr, type) {
             if (!arr || !Array.isArray(arr) || arr.length === 0) {
@@ -494,9 +556,9 @@
                 if (item.type) text += ` [${item.type}]`;
 
                 let colors = "bg-slate-900 text-slate-400";
-                if (type === 'soccer') colors = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
-                if (type === 'assist') colors = "bg-blue-500/10 text-blue-400 border border-blue-500/20";
-                if (type === 'card') colors = "bg-amber-500/10 text-amber-400 border border-amber-500/20";
+                if (type === 'soccer') colors = "bg-emerald-500/10 text-emerald-300 border border-emerald-500/20";
+                if (type === 'assist') colors = "bg-blue-500/10 text-blue-300 border border-blue-500/20";
+                if (type === 'card') colors = "bg-amber-500/10 text-amber-300 border border-amber-500/20";
                 if (type === 'injury') colors = "bg-rose-500/10 text-rose-400 border border-rose-500/20";
 
                 return `<span class="px-2 py-0.5 rounded text-[10px] font-semibold font-mono ${colors}">${text}</span>`;
@@ -504,7 +566,7 @@
         }
 
         /**
-         * Helper: Extracts research citations URLs and renders them as standard academic tags
+         * Deduplicates and displays up to 5 unique research citations with link icons
          */
         function renderCitations(sources) {
             if (!sources || !sources.groundingChunks || !Array.isArray(sources.groundingChunks)) {
@@ -517,37 +579,53 @@
                 return `<p class="text-slate-600 text-[10px] italic">No live search citations captured for this test run.</p>`;
             }
 
-            const linksHtml = validChunks.map(chunk => {
+            // Deduplicate URLs based on domain to clear clutter
+            const seenDomains = new Set();
+            const uniqueChunks = [];
+
+            for (const chunk of validChunks) {
+                try {
+                    const domain = new URL(chunk.web.uri).hostname;
+                    if (!seenDomains.has(domain)) {
+                        seenDomains.add(domain);
+                        uniqueChunks.push(chunk);
+                    }
+                    if (uniqueChunks.length >= 6) break; // Limit to 6 clean unique citations
+                } catch (e) {
+                    uniqueChunks.push(chunk);
+                }
+            }
+
+            const linksHtml = uniqueChunks.map(chunk => {
                 const title = chunk.web.title || "Research Source Link";
                 const uri = chunk.web.uri;
                 return `
-                    <a href="${uri}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded text-[10px] font-medium transition-colors max-w-full truncate font-mono">
+                    <a href="${uri}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 px-2.5 py-1 rounded text-[10px] font-medium transition-colors max-w-full truncate">
                         🔗 ${title}
                     </a>
                 `;
             }).join('');
 
             return `
-                <div class="mt-2 border-t border-slate-800 pt-3">
-                    <span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider block mb-2 font-mono">📚 VERIFIED SEARCH GROUNDING BIBLIOGRAPHY:</span>
-                    <div class="flex flex-wrap gap-2 max-h-32 overflow-y-auto pr-1">
+                <div class="mt-4 border-t border-slate-800/80 pt-3">
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-2 font-mono">📚 Verified Web Research Citations (Deduplicated):</span>
+                    <div class="flex flex-wrap gap-2 max-h-40 overflow-y-auto pr-1">
                         ${linksHtml}
                     </div>
                 </div>
             `;
         }
 
-        // Filters listeners
+        // Event Listeners
         document.getElementById('search-input').addEventListener('input', applyFilters);
         document.getElementById('filter-select').addEventListener('change', applyFilters);
 
-        // Load More Pagination listeners
         document.getElementById('load-more-btn').addEventListener('click', () => {
-            itemsToShow += 4; 
+            itemsToShow += 4;
             renderArchive();
         });
 
-        // Initialize script logic
+        // Initial Data Fetch
         loadDashboardData();
     </script>
 </body>
