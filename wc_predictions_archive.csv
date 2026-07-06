@@ -26,5 +26,8 @@
   ""error"": {
     ""code"": 503,
     ""message"": ""This model is currently","","","","","","","","","","","","","Pending Prediction",""
-"38","United States","Belgium","2026-07-06T21:00:00+00:00","Pending","","","","","","","","","","","","","Pending Prediction",""
+"38","United States","Belgium","2026-07-06T21:00:00+00:00","Error: Gemini API Error (HTTP 503): {
+  ""error"": {
+    ""code"": 503,
+    ""message"": ""This model is currently","","","","","","","","","","","","","Pending Prediction",""
 "39","Argentina","Egypt","2026-07-07T22:00:00+00:00","Pending","","","","","","","","","","","","","Pending Prediction",""
